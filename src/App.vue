@@ -60,8 +60,9 @@
             </div>
           </div>
           
-          <button class="btn-refresh button-primary" @click="fetchData">
-            <RefreshCw :size="16" :class="{'spin': loading}" /> Atualizar
+          <button class="btn-refresh button-primary" @click="forceUpdate" :disabled="isProcessing">
+            <RefreshCw :size="16" :class="{'spin': loading || isProcessing}" /> 
+            {{ isProcessing ? 'Processando IA...' : 'Atualizar Notícias' }}
           </button>
         </div>
       </header>
@@ -192,10 +193,11 @@ import {
   Flame, Scale, Minus, Loader2
 } from 'lucide-vue-next';
 import NewsCard from './components/NewsCard.vue';
-import { fetchLatestNews } from './services/api';
+import { fetchLatestNews, forceProcessNews } from './services/api';
 
 const news = ref([]);
 const loading = ref(true);
+const isProcessing = ref(false);
 const searchQuery = ref('');
 const impactFilter = ref('');
 const currentFilter = ref('All');
@@ -210,6 +212,21 @@ const fetchData = async () => {
   news.value = await fetchLatestNews();
   lastUpdated.value = format(new Date(), 'HH:mm aa');
   loading.value = false;
+};
+
+const forceUpdate = async () => {
+  if (isProcessing.value) return;
+  isProcessing.value = true;
+  loading.value = true;
+  try {
+    await forceProcessNews();
+    await fetchData();
+  } catch (error) {
+    console.error('Erro ao forçar atualização:', error);
+  } finally {
+    isProcessing.value = false;
+    loading.value = false;
+  }
 };
 
 onMounted(fetchData);

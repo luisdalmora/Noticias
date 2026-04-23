@@ -1,18 +1,22 @@
 {
-  "name": "Noticias",
+  "name": "noticias",
   "version": "0.0.0",
   "scripts": {
-    "dev": "vite --host",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "wait-on tcp:127.0.0.1:3001 && vite --host",
+    "dev:backend": "npm run dev --prefix backend",
     "build": "vite build"
   },
   "dependencies": {
-    "vue": "^3.4.21",
     "axios": "^1.6.8",
+    "date-fns": "^3.6.0",
     "lucide-vue-next": "^0.363.0",
-    "date-fns": "^3.6.0"
+    "vue": "^3.4.21"
   },
   "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.4",
+    "concurrently": "^9.2.1",
     "vite": "^5.2.8",
-    "@vitejs/plugin-vue": "^5.0.4"
+    "wait-on": "^9.0.5"
   }
 }
