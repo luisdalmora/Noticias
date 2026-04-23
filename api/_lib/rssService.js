@@ -1,8 +1,7 @@
 import Parser from 'rss-parser';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { config } from './config.js';
 
 const parser = new Parser({
   timeout: 10000,
@@ -11,17 +10,12 @@ const parser = new Parser({
   }
 });
 
-// Load config
-const configPath = join(process.cwd(), 'config.json');
-const config = JSON.parse(readFileSync(configPath, 'utf8'));
-
 export async function discoverRss(url) {
   try {
     const { data } = await axios.get(url, { timeout: 10000 });
     const $ = cheerio.load(data);
     let rssUrl = null;
     
-    // Look for RSS or Atom feeds
     $('link[type="application/rss+xml"], link[type="application/atom+xml"]').each((i, link) => {
       if (!rssUrl) {
         rssUrl = $(link).attr('href');
@@ -47,30 +41,22 @@ export async function fetchAndFilterFeeds(sources) {
   const allNews = [];
 
   for (const source of sources) {
-    console.log(`Processing source: ${source.name}...`);
     let feedUrl = source.fallbackRss;
 
     if (config.rss_auto_discovery) {
       const discovered = await discoverRss(source.url);
       if (discovered) {
         feedUrl = discovered;
-        console.log(`  -> Auto-discovered RSS: ${feedUrl}`);
-      } else {
-        console.log(`  -> Auto-discovery failed, using fallback: ${feedUrl}`);
       }
     }
 
-    if (!feedUrl) {
-      console.log(`  -> No RSS feed available for ${source.name}. Skipping.`);
-      continue;
-    }
+    if (!feedUrl) continue;
 
     try {
       const feed = await parser.parseURL(feedUrl);
       
       feed.items.forEach(item => {
         const pubDate = new Date(item.pubDate).getTime();
-        // Check if within 24h
         if (now - pubDate <= ONE_DAY) {
           allNews.push({
             title: item.title,
@@ -86,7 +72,7 @@ export async function fetchAndFilterFeeds(sources) {
         }
       });
     } catch (error) {
-      console.error(`  -> Error parsing feed ${feedUrl}:`, error.message);
+      console.error(`Error parsing feed ${feedUrl}:`, error.message);
     }
   }
 

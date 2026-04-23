@@ -38,21 +38,17 @@ function classifyType(title) {
 }
 
 function extractImage(item) {
-  // Try media:content
   if (item['media:content'] && item['media:content']['$'] && item['media:content']['$']['url']) {
     return item['media:content']['$']['url'];
   }
-  // Try enclosure
   if (item.enclosure && item.enclosure.url && item.enclosure.url.match(/\.(jpeg|jpg|gif|png)$/i)) {
     return item.enclosure.url;
   }
-  // Extract from HTML content
   const content = item['content:encoded'] || item.content || '';
   const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
   if (imgMatch && imgMatch[1]) {
     return imgMatch[1];
   }
-  // Retorna null se não encontrar para a IA gerar depois
   return null;
 }
 
@@ -85,11 +81,10 @@ export function filterAndRankNews(rawNews) {
       source: item.source,
       pubDate: item.pubDate,
       thumbnail: thumbnail,
-      aiEnhanced: false // Flag para o frontend
+      aiEnhanced: false
     });
   }
 
-  // Ordenar por relevância
   return processedData.sort((a, b) => {
     const impactScores = { 'Alta': 3, 'Média': 2, 'Baixa': 1 };
     return impactScores[b.impact] - impactScores[a.impact];
