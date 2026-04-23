@@ -5,6 +5,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 
 const parser = new Parser({
+  timeout: 10000,
   customFields: {
     item: ['media:group', 'media:content']
   }

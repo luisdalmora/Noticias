@@ -6,85 +6,96 @@ dotenv.config();
 const genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function enhanceTopNewsWithAI(rankedNews) {
-  // Pegamos apenas as top 3 notícias classificadas como "Alta" para não estourar limite da API
-  const topNews = rankedNews.filter(n => n.impact === 'Alta').slice(0, 3);
-  
-  if (topNews.length === 0) {
-    console.log('Nenhuma notícia de Alta prioridade para a IA enriquecer. Pulando IA.');
-    return rankedNews;
-  }
+  if (rankedNews.length === 0) return rankedNews;
 
-  console.log(`IA Híbrida: Melhorando os ${topNews.length} principais destaques com Gemini...`);
+  // Processa as top 15 notícias para não abusar do context window ou output token limits num único JSON
+  const batchNews = rankedNews.slice(0, 15);
+
+  console.log(`IA Curadora: Processando lote único de ${batchNews.length} notícias para validação, resumo e tradução...`);
 
   try {
-    const textPayload = topNews.map((n, i) => `[ID: ${n.id}] Titulo: ${n.title}\nTexto Original: ${n.summary}`).join('\n\n');
+    const textPayload = batchNews.map(n => `[ID: ${n.id}] Categoria: ${n.category}\nTitulo Original: ${n.title}\nTexto: ${n.summary}`).join('\n\n---\n\n');
     
-    const prompt = `Você é um jornalista tech. Leia os textos abaixo e reescreva o resumo de cada um de forma altamente profissional, cativante e curta (máximo 2 frases). Mantenha o ID intacto.
-Responda APENAS em JSON estrito neste formato:
-[
-  { "id": "id-aqui", "aiSummary": "resumo perfeito aqui" }
-]
+    const prompt = `Você é o Curador e Auditor-Chefe Senior de Tecnologia. Sua tarefa é processar as notícias em lote seguindo regras inquebráveis:
 
-Textos:
+REGRAS:
+1. FAKE NEWS: Marque "isFake" como true para dados tecnicamente irreais.
+2. ISOLAMENTO: Nintendo = Consolas. Samsung = Mobile. Marque "platform_violation": true se houver mistura.
+3. TRADUÇÃO OBRIGATÓRIA: O campo "title_pt" DEVE conter o título 100% traduzido para Português do Brasil (PT-BR). É proibido devolver o título em inglês.
+4. RESUMO: Um resumo premium em até 2 frases, em PT-BR, no campo "summary".
+5. IMAGEM IA: Escreva um prompt visual EM INGLÊS detalhado (ex: "cinematic shot of...") no campo "image_prompt", que descreva perfeitamente o assunto da notícia para um gerador de imagens IA.
+
+Responda APENAS com um array JSON válido e estrito:
+[ { "id": "...", "title_pt": "Título PT-BR", "summary": "Resumo PT-BR", "image_prompt": "English prompt for image...", "isFake": false, "platform_violation": false } ]
+
+Textos Originais:
 ${textPayload}`;
 
-    const response = await genai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-    });
+    let response = null;
+    let attempts = 0;
+    while (attempts < 3) {
+      try {
+        response = await genai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: prompt,
+        });
+        break; // Sucesso, sai do loop
+      } catch (err) {
+        attempts++;
+        if (err.message.includes('503') || err.message.includes('high demand') || attempts === 3) {
+          console.warn(`Tentativa ${attempts} falhou com 503. Aguardando 3s...`);
+          await new Promise(r => setTimeout(r, 3000));
+          if (attempts === 3) throw err;
+        } else {
+          throw err;
+        }
+      }
+    }
 
     const content = response.text.trim();
     const jsonStr = content.replace(/```json/g, '').replace(/```/g, '');
     const aiResults = JSON.parse(jsonStr);
 
-    // Merge os resultados da IA de volta no array principal
-    // 1. Enriquecer destaques
-    const finalNews = rankedNews.map(news => {
+    const finalNews = [];
+    
+    for (const news of rankedNews) {
       const enhanced = aiResults.find(r => r.id === news.id);
       if (enhanced) {
-        return {
+        if (enhanced.isFake || enhanced.platform_violation) {
+          console.log(`❌ Rejeitado pela IA: [${news.title}] - Fake: ${enhanced.isFake}, Violation: ${enhanced.platform_violation}`);
+          continue; // Filtra a notícia
+        }
+        
+        let finalThumbnail = news.thumbnail;
+        // Se a notícia veio sem imagem original, cria a URL usando a inteligência artificial (pollinations.ai)
+        if (!finalThumbnail && enhanced.image_prompt) {
+          finalThumbnail = `https://image.pollinations.ai/prompt/${encodeURIComponent(enhanced.image_prompt)}?width=800&height=450&nologo=true`;
+        }
+
+        finalNews.push({
           ...news,
-          summary: enhanced.aiSummary,
+          title: enhanced.title_pt && enhanced.title_pt.trim() !== '' ? enhanced.title_pt : news.title,
+          summary: enhanced.summary || news.summary,
+          thumbnail: finalThumbnail,
           aiEnhanced: true
-        };
+        });
+      } else {
+        // Se a IA omitiu o ID ou não coube no batch, passa original
+        if (batchNews.find(b => b.id === news.id)) {
+          // estava no batch mas IA ignorou (fallback)
+          finalNews.push(news);
+        } else {
+          // não estava no batch
+          finalNews.push(news);
+        }
       }
-      return news;
-    });
+    }
 
-    // 2. Traduzir TODOS os títulos para Português em um único lote (Batch)
-    console.log(`IA Híbrida: Traduzindo ${finalNews.length} títulos para Português...`);
-    
-    // Chunk array to avoid passing too much in a single prompt if needed, but 100-200 is fine for flash.
-    const titlesPayload = finalNews.map(n => `[ID: ${n.id}] ${n.title}`).join('\n');
-    const translatePrompt = `Traduza os títulos abaixo para Português do Brasil (PT-BR). Mantenha o tom jornalístico e o formato exato com o ID.
-Retorne APENAS um JSON estrito neste formato:
-[ { "id": "id-aqui", "t": "titulo traduzido" } ]
-
-Textos:
-${titlesPayload}`;
-
-    const transResponse = await genai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: translatePrompt,
-    });
-    
-    const transStr = transResponse.text.trim().replace(/```json/g, '').replace(/```/g, '');
-    const transResults = JSON.parse(transStr);
-    
-    const translatedNews = finalNews.map(news => {
-      const translation = transResults.find(r => r.id === news.id);
-      if (translation && translation.t) {
-        return { ...news, title: translation.t };
-      }
-      return news;
-    });
-
-    console.log('IA Híbrida: Resumos premium e traduções aplicados com sucesso.');
-    return translatedNews;
+    console.log(`IA Curadora finalizou: ${finalNews.length} notícias válidas mantidas.`);
+    return finalNews;
 
   } catch (error) {
-    console.error('Erro na IA Híbrida (Fallback ativado, mantendo textos originais):', error.message);
-    // Em caso de falha da IA (erro 503, 429), o sistema continua normalmente com os textos originais
+    console.error('Erro na IA Curadora (Fallback ativado, mantendo dados originais):', error.message);
     return rankedNews;
   }
 }

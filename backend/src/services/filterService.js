@@ -3,15 +3,21 @@ export function stripHtml(html) {
   return html.replace(/<[^>]*>?/gm, '').trim();
 }
 
-function classifyImpact(title, content) {
+function classifyImpact(title, content, category) {
   const t = title.toLowerCase();
-  const c = (content || '').toLowerCase();
   
-  if (t.includes('zto') || t.includes('urgente') || t.includes('nintendo direct') || 
-      t.includes('lançamento') || t.includes('anunciado') || t.includes('oficial') ||
-      t.includes('review') || t.includes('análise') || t.includes('vazamento grave') ||
-      t.includes('galaxy s2') || t.includes('switch 2') || t.includes('galaxy z')) {
-    return 'Alta';
+  if (category === 'Samsung') {
+    if (t.includes('zto') || t.includes('galaxy s2') || t.includes('galaxy z') || 
+        t.includes('urgente') || t.includes('oficial') || t.includes('lançamento') || 
+        t.includes('vazamento grave')) {
+      return 'Alta';
+    }
+  } else if (category === 'Nintendo') {
+    if (t.includes('nintendo direct') || t.includes('switch 2') || t.includes('urgente') || 
+        t.includes('oficial') || t.includes('lançamento') || t.includes('vazamento grave') || 
+        t.includes('review') || t.includes('análise')) {
+      return 'Alta';
+    }
   }
   
   if (t.includes('trailer') || t.includes('rumor') || t.includes('data de') || 
@@ -46,8 +52,8 @@ function extractImage(item) {
   if (imgMatch && imgMatch[1]) {
     return imgMatch[1];
   }
-  // Fallback placeholder
-  return 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=800&q=80';
+  // Retorna null se não encontrar para a IA gerar depois
+  return null;
 }
 
 export function filterAndRankNews(rawNews) {
@@ -64,7 +70,7 @@ export function filterAndRankNews(rawNews) {
       summary = summary.substring(0, 200) + '...';
     }
 
-    const impact = classifyImpact(item.title, summary);
+    const impact = classifyImpact(item.title, summary, item.category);
     const type = classifyType(item.title);
     const thumbnail = extractImage(item);
 

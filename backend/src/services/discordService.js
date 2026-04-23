@@ -8,13 +8,25 @@ dotenv.config();
 const configPath = join(process.cwd(), 'config.json');
 const config = JSON.parse(readFileSync(configPath, 'utf8'));
 
+function formatCategoryFeed(newsArray, category, limit = 4, excludeIds = new Set()) {
+  const filtered = newsArray.filter(n => n.category === category && !excludeIds.has(n.id));
+  if (filtered.length === 0) return 'Nenhuma nova notícia regular.';
+  
+  const text = filtered.slice(0, limit)
+    .map(n => `• [${n.title.substring(0, 80)}](${n.link})\n  *${n.summary.substring(0, 60)}...*`)
+    .join('\n')
+    .substring(0, 950);
+    
+  return filtered.length > limit ? `${text}\n\n*...e mais ${filtered.length - limit} notícias*` : text;
+}
+
 export async function sendDiscordNotification(newsData) {
   if (!config.notificacoes_ativas) {
     console.log('Notificações no Discord estão desativadas na configuração.');
     return;
   }
 
-  const webhookUrl = process.env.DISCORD_WEBHOOK_URL || config.discord_webhook;
+  const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
   if (!webhookUrl) {
     console.warn('Discord Webhook URL não configurado. Pulando notificação.');
     return;
@@ -39,17 +51,8 @@ export async function sendDiscordNotification(newsData) {
       ? highImpact[0].thumbnail 
       : null;
 
-    // Nintendo Summary (Excluindo destaques)
-    const nintendoNews = newsData.filter(n => n.category === 'Nintendo' && !highlightedIds.has(n.id));
-    const nintendoText = nintendoNews.length > 0
-      ? nintendoNews.slice(0, 4).map(n => `• [${n.title.substring(0, 80)}](${n.link})\n  *${n.summary.substring(0, 60)}...*`).join('\n').substring(0, 950) + (nintendoNews.length > 4 ? `\n\n*...e mais ${nintendoNews.length - 4} notícias*` : '')
-      : 'Nenhuma nova notícia regular.';
-
-    // Samsung Summary (Excluindo destaques)
-    const samsungNews = newsData.filter(n => n.category === 'Samsung' && !highlightedIds.has(n.id));
-    const samsungText = samsungNews.length > 0
-      ? samsungNews.slice(0, 4).map(n => `• [${n.title.substring(0, 80)}](${n.link})\n  *${n.summary.substring(0, 60)}...*`).join('\n').substring(0, 950) + (samsungNews.length > 4 ? `\n\n*...e mais ${samsungNews.length - 4} notícias*` : '')
-      : 'Nenhuma nova notícia regular.';
+    const nintendoText = formatCategoryFeed(newsData, 'Nintendo', 4, highlightedIds);
+    const samsungText = formatCategoryFeed(newsData, 'Samsung', 4, highlightedIds);
 
     // Breaking News
     const breakingNews = newsData.filter(n => n.impact === 'Alta' && n.title.toLowerCase().includes('urgente'));
