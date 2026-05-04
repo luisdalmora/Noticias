@@ -1,0 +1,40 @@
+.focus-within-ring {
+  @apply focus:outline-none focus:ring-4 focus:ring-console-accent/50 transition-all;
+}
+
+.hover-glow {
+  @apply transition-shadow duration-300;
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 20px rgba(255, 45, 85, 0.4);
+}
+
+.slide-up-item {
+  animation: slide-up 0.4s ease-out forwards;
+}
+
+.fade-in-content {
+  animation: fade-in 0.3s ease-in forwards;
+}
+
+/* Staggered animation classes for JS usage */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+
+/* Micro-interactions */
+.active-click:active {
+  transform: scale(0.98);
+}
+
+@keyframes slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

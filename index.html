@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Noticias Premium | Dashboard</title>
+  <meta name="description" content="Central de notícias gamer e tech de alta performance.">
+  <link rel="stylesheet" href="/src/assets/css/input.css">
+  <link rel="icon" type="image/svg+xml" href="/vite.svg">
+</head>
+<body class="bg-console-dark">
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar"></aside>
+
+    <main id="main-content" class="main-content">
+      <!-- Topbar -->
+      <header id="topbar" class="topbar"></header>
+
+      <!-- Page Content -->
+      <div class="content-wrapper">
+        <section class="mb-10">
+          <div class="flex justify-between items-end mb-6">
+            <div>
+              <h1 class="text-3xl lg:text-5xl font-black mb-2">BEM-VINDO, <span class="text-console-accent">JOGADOR</span></h1>
+              <p class="text-console-secondary font-bold uppercase tracking-widest text-xs">Resumo do dia: Notícias processadas por IA</p>
+            </div>
+            <div id="stats-container" class="hidden lg:flex gap-4"></div>
+          </div>
+
+          <!-- Feature Stats Cards (rendered by JS) -->
+          <div id="stats-container-mobile" class="lg:hidden mb-8"></div>
+        </section>
+
+        <section>
+          <div class="flex items-center gap-3 mb-6">
+            <span class="w-1.5 h-6 bg-console-accent rounded-full"></span>
+            <h2 class="text-xl font-black uppercase tracking-widest">Últimos Destaques</h2>
+          </div>
+          
+          <div id="news-container">
+            <!-- Loading Skeleton will be here -->
+          </div>
+        </section>
+      </div>
+
+      <!-- Mobile Nav -->
+      <nav id="mobile-nav" class="mobile-nav"></nav>
+    </main>
+  </div>
+
+  <script type="module" src="/src/assets/js/app.js"></script>
+</body>
+</html>

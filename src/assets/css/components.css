@@ -1,0 +1,42 @@
+.console-card {
+  @apply bg-console-card border-2 border-transparent rounded-console p-5 transition-all duration-300 hover:border-white/20 hover:scale-[1.02] hover:shadow-console cursor-pointer relative overflow-hidden;
+}
+
+.console-card.featured {
+  @apply col-span-1 md:col-span-2 xl:col-span-2 bg-gradient-to-br from-console-card to-console-gray;
+}
+
+.console-button {
+  @apply bg-console-gray hover:bg-neutral-800 text-white px-6 py-3 rounded-full font-bold transition-all flex items-center gap-2 active:scale-95;
+}
+
+.console-button-primary {
+  @apply bg-console-accent hover:bg-rose-600 shadow-console-glow;
+}
+
+.badge {
+  @apply px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider inline-block;
+}
+
+.badge-high { @apply bg-console-accent text-white; }
+.badge-medium { @apply bg-console-yellow text-black; }
+.badge-low { @apply bg-console-blue text-white; }
+.badge-official { @apply bg-console-green text-black; }
+.badge-rumor { @apply bg-neutral-600 text-white; }
+
+.glass-panel {
+  @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-console-inner;
+}
+
+.skeleton {
+  @apply bg-console-gray animate-pulse rounded-md;
+}
+
+/* Timeline */
+.timeline-item {
+  @apply relative pl-8 pb-8 last:pb-0 border-l border-white/10;
+}
+
+.timeline-dot {
+  @apply absolute left-[-5px] top-0 w-2.5 h-2.5 rounded-full bg-console-accent shadow-console-glow;
+}
