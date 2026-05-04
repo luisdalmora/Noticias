@@ -14,30 +14,83 @@
 <body>
   <div class="app-container">
     <aside id="sidebar-placeholder" class="sidebar"></aside>
+
     <main class="main-content">
       <header class="topbar">
-        <div class="flex items-center gap-4 flex-1 max-w-xl">
-          <div class="relative w-full">
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">🔍</span>
-            <input type="text" id="global-search" placeholder="Buscar no histórico..." 
-                   class="w-full bg-[#1a1a1a] border border-white/5 rounded-full py-2 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500/50 transition-all">
+        <div class="flex items-center gap-6 flex-1 max-w-2xl">
+          <div class="relative w-full group">
+            <span class="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-500 transition-colors">🔍</span>
+            <input type="text" id="global-search" name="q" placeholder="Buscar no histórico..." 
+                   class="w-full bg-[#111] border border-white/5 rounded-2xl py-4 pl-14 pr-6 text-sm focus:bg-[#151515] focus:ring-4 focus:ring-blue-500/20 transition-all">
           </div>
         </div>
+        <div id="system-status"></div>
       </header>
+
       <div class="content-wrapper">
-        <div class="flex items-center gap-3 mb-8">
-          <span class="w-1.5 h-8 bg-gray-500 rounded-full"></span>
-          <h1 class="text-3xl font-black uppercase tracking-widest text-gray-500">Histórico Completo</h1>
+        <div class="flex flex-col lg:flex-row gap-8 items-start mb-12">
+          <div class="flex-1">
+            <div class="flex items-center gap-6 mb-4">
+              <span class="w-2 h-12 bg-blue-500 rounded-full shadow-lg shadow-blue-500/40"></span>
+              <h1 class="text-4xl font-black uppercase tracking-widest italic">Histórico <span class="text-blue-500">Global</span></h1>
+            </div>
+            <p id="result-count" class="text-xs text-gray-500 font-bold uppercase tracking-widest px-8">Carregando...</p>
+          </div>
+
+          <form id="history-filters" class="w-full lg:w-auto flex flex-wrap gap-4 glass-panel p-6">
+            <select name="category">
+              <option value="">Categoria: Todas</option>
+              <option value="Nintendo">Nintendo</option>
+              <option value="Samsung">Samsung</option>
+              <option value="Gaming">Gaming</option>
+              <option value="Tech">Tech</option>
+            </select>
+            <select name="type">
+              <option value="">Tipo: Todos</option>
+              <option value="Oficial">Oficial</option>
+              <option value="Rumor">Rumor</option>
+              <option value="Lançamento">Lançamento</option>
+            </select>
+            <select name="impact">
+              <option value="">Impacto: Todos</option>
+              <option value="Alta">Alta</option>
+              <option value="Média">Média</option>
+              <option value="Baixa">Baixa</option>
+            </select>
+            <select name="order">
+              <option value="newest">Mais Recentes</option>
+              <option value="oldest">Mais Antigas</option>
+            </select>
+            <button type="reset" class="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-red-500/10 rounded-xl transition-all">
+              Limpar Filtros
+            </button>
+          </form>
         </div>
+
         <div id="news-container"></div>
       </div>
+
+      <nav class="mobile-nav" id="mobile-nav-placeholder"></nav>
     </main>
   </div>
+
+  <script src="assets/js/config.js"></script>
   <script src="assets/js/utils.js"></script>
   <script src="assets/js/storage.js"></script>
   <script src="assets/js/data.js"></script>
   <script src="assets/js/filters.js"></script>
   <script src="assets/js/render.js"></script>
   <script src="assets/js/app.js"></script>
+  <script>
+    fetch('index.html').then(res => res.text()).then(html => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const mobileNav = doc.querySelector('.mobile-nav').innerHTML;
+      document.getElementById('mobile-nav-placeholder').innerHTML = mobileNav;
+      document.querySelectorAll('.mobile-nav a').forEach(link => {
+        if (link.getAttribute('href') === 'historico.html') link.classList.add('active');
+      });
+    });
+  </script>
 </body>
 </html>

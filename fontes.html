@@ -14,19 +14,42 @@
 <body>
   <div class="app-container">
     <aside id="sidebar-placeholder" class="sidebar"></aside>
+
     <main class="main-content">
-      <header class="topbar"></header>
+      <header class="topbar">
+        <div id="system-status" class="ml-auto"></div>
+      </header>
+
       <div class="content-wrapper">
-        <h1 class="text-3xl font-black mb-8 uppercase tracking-widest text-cyan-400">Fontes Monitoradas</h1>
-        <div id="sources-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        <div class="flex items-center gap-6 mb-12">
+          <span class="w-2 h-12 bg-cyan-500 rounded-full shadow-lg shadow-cyan-500/40"></span>
+          <h1 class="text-4xl font-black uppercase tracking-widest italic">Fontes <span class="text-cyan-500">Inteligentes</span></h1>
+        </div>
+
+        <div id="sources-container"></div>
       </div>
+
+      <nav class="mobile-nav" id="mobile-nav-placeholder"></nav>
     </main>
   </div>
+
+  <script src="assets/js/config.js"></script>
   <script src="assets/js/utils.js"></script>
   <script src="assets/js/storage.js"></script>
   <script src="assets/js/data.js"></script>
   <script src="assets/js/filters.js"></script>
   <script src="assets/js/render.js"></script>
   <script src="assets/js/app.js"></script>
+  <script>
+    fetch('index.html').then(res => res.text()).then(html => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const mobileNav = doc.querySelector('.mobile-nav').innerHTML;
+      document.getElementById('mobile-nav-placeholder').innerHTML = mobileNav;
+      document.querySelectorAll('.mobile-nav a').forEach(link => {
+        if (link.getAttribute('href') === 'fontes.html') link.classList.add('active');
+      });
+    });
+  </script>
 </body>
 </html>

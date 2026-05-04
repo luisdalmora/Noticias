@@ -14,45 +14,137 @@
 <body>
   <div class="app-container">
     <aside id="sidebar-placeholder" class="sidebar"></aside>
+
     <main class="main-content">
-      <header class="topbar"></header>
+      <header class="topbar">
+        <div id="system-status" class="ml-auto"></div>
+      </header>
+
       <div class="content-wrapper">
-        <h1 class="text-3xl font-black mb-8 uppercase tracking-widest">Ajustes do Sistema</h1>
-        <div class="max-w-2xl">
-          <div class="glass-panel p-8 space-y-6">
+        <div class="flex items-center gap-6 mb-12">
+          <span class="w-2 h-12 bg-gray-500 rounded-full"></span>
+          <h1 class="text-4xl font-black uppercase tracking-widest italic">Ajustes <span class="text-gray-600 text-3xl">Core</span></h1>
+        </div>
+
+        <div class="max-w-4xl grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div class="glass-panel p-8 space-y-8 animate-slide-up">
+            <h2 class="text-xs font-black uppercase tracking-[0.4em] text-red-500 mb-6">Interface OS</h2>
+            
             <div class="flex items-center justify-between">
               <div>
                 <p class="font-bold">Modo Compacto</p>
-                <p class="text-xs text-gray-500">Exibir cards menores na lista</p>
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Otimizar espaço na grade</p>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" class="sr-only peer">
-                <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500"></div>
+                <input type="checkbox" id="pref-compact" class="sr-only peer">
+                <div class="w-14 h-7 bg-gray-900 border border-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-gray-600 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500 peer-checked:after:bg-white"></div>
               </label>
             </div>
+
             <div class="flex items-center justify-between">
               <div>
-                <p class="font-bold">Tema Escuro</p>
-                <p class="text-xs text-gray-500">Forçar modo noturno em todo o sistema</p>
+                <p class="font-bold">Animações OS</p>
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Efeitos de transição fluidos</p>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" checked class="sr-only peer">
-                <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500"></div>
+                <input type="checkbox" id="pref-animations" checked class="sr-only peer">
+                <div class="w-14 h-7 bg-gray-900 border border-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-gray-600 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500 peer-checked:after:bg-white"></div>
               </label>
             </div>
-            <button class="w-full bg-red-500 hover:bg-red-600 text-white font-black py-4 rounded-2xl transition-all shadow-lg shadow-red-500/20 active:scale-95">
-              SALVAR CONFIGURAÇÕES
+
+            <div class="space-y-3">
+              <p class="text-[10px] text-gray-500 font-black uppercase tracking-widest">Notícias por Página</p>
+              <select id="pref-limit" class="w-full">
+                <option value="12">12 Notícias</option>
+                <option value="24">24 Notícias</option>
+                <option value="48">48 Notícias</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="glass-panel p-8 space-y-8 animate-slide-up stagger-1">
+            <h2 class="text-xs font-black uppercase tracking-[0.4em] text-cyan-500 mb-6">Conectividade</h2>
+            
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="font-bold">Online Mode</p>
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Priorizar endpoint externo</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="pref-online" class="sr-only peer">
+                <div class="w-14 h-7 bg-gray-900 border border-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-gray-600 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500 peer-checked:after:bg-white"></div>
+              </label>
+            </div>
+
+            <div class="space-y-3">
+              <p class="text-[10px] text-gray-500 font-black uppercase tracking-widest">Endpoint URL (JSON)</p>
+              <input type="text" id="pref-url" placeholder="https://api.meusite.com/news" class="w-full">
+              <p class="text-[8px] text-gray-600 font-bold leading-tight">A URL deve retornar um array JSON válido. Reinicie o sistema após alterar.</p>
+            </div>
+
+            <button id="btn-save-prefs" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-black py-4 rounded-2xl transition-all shadow-xl shadow-cyan-500/20 active:scale-95 uppercase tracking-widest text-xs">
+              Salvar Configurações
             </button>
           </div>
         </div>
+
+        <div id="save-feedback" class="fixed bottom-10 right-10 hidden animate-slide-up">
+          <div class="bg-green-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-2xl">
+            ✓ Configurações salvas
+          </div>
+        </div>
       </div>
+
+      <nav class="mobile-nav" id="mobile-nav-placeholder"></nav>
     </main>
   </div>
+
+  <script src="assets/js/config.js"></script>
   <script src="assets/js/utils.js"></script>
   <script src="assets/js/storage.js"></script>
   <script src="assets/js/data.js"></script>
   <script src="assets/js/filters.js"></script>
   <script src="assets/js/render.js"></script>
   <script src="assets/js/app.js"></script>
+  <script>
+    // Carregar preferências iniciais no form
+    window.addEventListener('DOMContentLoaded', () => {
+      const prefs = Storage.getPrefs();
+      document.getElementById('pref-compact').checked = prefs.compactMode || false;
+      document.getElementById('pref-animations').checked = prefs.animations !== false;
+      document.getElementById('pref-limit').value = prefs.newsPerPage || 12;
+      document.getElementById('pref-online').checked = prefs.onlineMode || false;
+      document.getElementById('pref-url').value = prefs.onlineUrl || "";
+    });
+
+    // Salvar preferências
+    document.getElementById('btn-save-prefs').addEventListener('click', () => {
+      const newPrefs = {
+        compactMode: document.getElementById('pref-compact').checked,
+        animations: document.getElementById('pref-animations').checked,
+        newsPerPage: parseInt(document.getElementById('pref-limit').value),
+        onlineMode: document.getElementById('pref-online').checked,
+        onlineUrl: document.getElementById('pref-url').value,
+        theme: 'dark'
+      };
+      
+      Storage.savePrefs(newPrefs);
+      
+      // Feedback
+      const fb = document.getElementById('save-feedback');
+      fb.classList.remove('hidden');
+      setTimeout(() => fb.classList.add('hidden'), 3000);
+    });
+
+    fetch('index.html').then(res => res.text()).then(html => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const mobileNav = doc.querySelector('.mobile-nav').innerHTML;
+      document.getElementById('mobile-nav-placeholder').innerHTML = mobileNav;
+      document.querySelectorAll('.mobile-nav a').forEach(link => {
+        if (link.getAttribute('href') === 'configuracoes.html') link.classList.add('active');
+      });
+    });
+  </script>
 </body>
 </html>

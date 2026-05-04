@@ -4,16 +4,17 @@
 }
 
 .sidebar {
-  width: 280px;
+  width: 300px;
   background-color: var(--bg-secondary);
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  border-right: 1px solid rgba(255, 255, 255, 0.03);
   height: 100vh;
   position: sticky;
   top: 0;
   display: flex;
   flex-direction: column;
-  padding: 1.5rem;
+  padding: 2rem 1.5rem;
   z-index: 50;
+  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.2);
 }
 
 .main-content {
@@ -21,42 +22,46 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
+  background-image: radial-gradient(circle at top right, rgba(255, 45, 85, 0.03), transparent 40%),
+                    radial-gradient(circle at bottom left, rgba(0, 229, 255, 0.03), transparent 40%);
 }
 
 .content-wrapper {
-  padding: 2rem;
-  max-width: 1400px;
+  padding: 2.5rem;
+  max-width: 1600px;
   margin: 0 auto;
   width: 100%;
 }
 
 .topbar {
-  height: 64px;
-  background-color: rgba(10, 10, 10, 0.8);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  height: 80px;
+  background-color: rgba(5, 5, 5, 0.7);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
   position: sticky;
   top: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 2rem;
+  padding: 0 2.5rem;
   z-index: 40;
 }
 
 .mobile-nav {
   display: none;
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: rgba(20, 20, 20, 0.9);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  bottom: 1.5rem;
+  left: 1rem;
+  right: 1rem;
+  background-color: rgba(15, 15, 15, 0.8);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 0.75rem 1.5rem;
   justify-content: space-between;
   align-items: center;
   z-index: 100;
+  border-radius: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 @media (max-width: 1024px) {
@@ -67,7 +72,11 @@
     display: flex;
   }
   .content-wrapper {
-    padding: 1rem;
-    margin-bottom: 70px;
+    padding: 1.5rem;
+    padding-bottom: 120px;
+  }
+  .topbar {
+    padding: 0 1.5rem;
+    height: 70px;
   }
 }

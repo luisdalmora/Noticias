@@ -1,14 +1,15 @@
 :root {
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #141414;
-  --card-bg: #1c1c1c;
+  --bg-primary: #050505;
+  --bg-secondary: #0f0f0f;
+  --card-bg: #141414;
   --text-primary: #ffffff;
-  --text-secondary: #a0a0a0;
+  --text-secondary: #888888;
   --accent-red: #ff2d55;
   --accent-cyan: #00e5ff;
   --accent-blue: #007aff;
   --status-green: #4cd964;
   --status-yellow: #ffcc00;
+  --border-radius-xl: 2rem;
   --border-radius-lg: 1.5rem;
   --border-radius-md: 1rem;
 }
@@ -19,12 +20,13 @@ body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  line-height: 1.5;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
@@ -32,10 +34,25 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #333;
+  background: #222;
   border-radius: 10px;
+  border: 2px solid var(--bg-primary);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #444;
+  background: #333;
+}
+
+/* Typography Refinement */
+h1, h2, h3, h4 {
+  letter-spacing: -0.02em;
+}
+
+/* Utility for no-scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

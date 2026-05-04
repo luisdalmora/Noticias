@@ -1,51 +1,42 @@
-# 🎮 Noticias Premium - Static Edition
+# 🎮 Noticias Premium - OS v2.2.0
 
-Uma central de notícias gamer e tech premium, inspirada na interface de consoles modernos (Switch 2 Style), 100% estática e direta.
+Uma central de notícias gamer e tech premium com arquitetura 100% estática e suporte a modo online/offline inteligente.
 
-## 🚀 Objetivo
-Oferecer uma experiência visual de alto nível sem a complexidade de frameworks ou ferramentas de build. Ideal para visualização local imediata ou hospedagem em qualquer servidor de arquivos estáticos.
+## ✨ Novidades da Versão 2.2.0
+- **Modo Online/Offline**: Suporte a endpoints externos com fallback automático para JSON local.
+- **Sistema de Status**: Indicadores visuais em tempo real (Online, Offline, Erro).
+- **Busca Avançada**: Pesquisa em títulos, resumos, tags, fontes e categorias.
+- **Histórico Completo**: Novos filtros por impacto, tipo, categoria e ordenação cronológica.
+- **Design Refinado**: Interface inspirada em sistemas operacionais de consoles de nova geração (estilo Switch 2) com animações fluidas e glassmorphism.
 
-## 🛠 Stack Tecnológica
-- **Linguagens**: HTML5 Semântico, CSS3 Moderno, JavaScript Vanilla (ES6).
-- **Estilização**: Tailwind CSS via CDN.
-- **Dados**: Arquivos JSON locais em `data/`.
-- **Persistência**: LocalStorage para preferências do usuário.
+## 🚀 Como Abrir o Projeto
+Como o projeto utiliza `fetch` para carregar os dados JSON, você deve abri-lo usando um servidor local para evitar bloqueios de CORS do navegador.
 
-## 📂 Estrutura do Projeto
-```text
-Noticias/
-├── index.html           # Dashboard principal
-├── nintendo.html        # Central Nintendo
-├── samsung.html         # Central Samsung/Android
-├── rumores.html         # Central de Vazamentos
-├── noticia.html         # Visualização detalhada
-├── assets/
-│   ├── css/            # Estilos organizados por responsabilidade
-│   └── js/             # Lógica modular pura
-└── data/
-    ├── noticias.json    # Banco de dados de notícias
-    └── fontes.json      # Cadastro de fontes monitoradas
+1.  **VS Code**: Use a extensão **Live Server**.
+2.  **Hospedagem**: Publique em qualquer serviço estático (GitHub Pages, Vercel, Netlify).
+
+## ⚙️ Configuração (Modo Online)
+Edite o arquivo `assets/js/config.js` para conectar o sistema a um endpoint real:
+
+```javascript
+const CONFIG = {
+  USE_ONLINE_MODE: true,
+  ONLINE_NEWS_URL: "https://seu-endpoint.com/api/news",
+  // ...
+};
 ```
 
-## ⚙️ Como Utilizar
+O sistema validará e normalizará os dados recebidos automaticamente. Se o endpoint falhar, o sistema ativará o **Offline Mode** usando o `data/noticias.json`.
 
-### 1. Acesso Direto
-Basta abrir o arquivo `index.html` em qualquer navegador moderno. 
+## 📂 Estrutura de Dados
+- **`data/noticias.json`**: Banco de dados local para demonstração (fallback).
+- **`data/fontes.json`**: Lista de fontes monitoradas pelo sistema.
 
-> [!IMPORTANT]
-> Alguns navegadores (como o Chrome) possuem restrições de segurança (CORS) ao carregar arquivos JSON locais via `file://`. Caso os dados não apareçam, recomenda-se abrir a pasta com uma extensão de servidor local (ex: **Live Server** no VS Code) ou desativar temporariamente as restrições de arquivos locais.
-
-### 2. Sem Dependências
-Não é necessário rodar `npm install`, `npm run dev` ou qualquer outro comando de terminal. O projeto é autossuficiente.
-
-### 3. Personalização
-Para adicionar novas notícias, basta editar o arquivo `data/noticias.json` seguindo o padrão estabelecido.
-
-## 🎨 Design System
-- **Fundo**: Deep Graphite (#0a0a0a).
-- **Acentos**: Red Neon (#ff2d55) e Cyan Tech (#00e5ff).
-- **Tipografia**: Inter (via Google Fonts).
-- **UX**: Sidebar persistente no desktop e Bottom Bar otimizada para mobile.
+## 🛠 Tecnologias
+- HTML5 Semântico
+- CSS3 (Variáveis, Flexbox, Grid, Animações)
+- JavaScript Vanilla (ES6+, AbortController, LocalStorage)
+- Tailwind CSS via CDN
 
 ---
-Desenvolvido com foco em performance e simplicidade.
+*Este projeto não utiliza frameworks (Vue/React/Next) ou ferramentas de build (npm/Vite), mantendo a simplicidade e portabilidade total.*
