@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notícia | Noticias Premium</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/animations.css">
+</head>
+<body>
+  <div class="app-container">
+    <aside id="sidebar-placeholder" class="sidebar"></aside>
+    <main class="main-content">
+      <header class="topbar">
+        <button onclick="window.history.back()" class="flex items-center gap-2 text-gray-500 hover:text-white font-bold transition-all">
+          <span>⬅️</span>
+          <span>VOLTAR</span>
+        </button>
+      </header>
+      <div class="content-wrapper">
+        <div id="noticia-container">
+          <div class="max-w-4xl mx-auto">
+            <div class="skeleton h-12 w-3/4 mb-4"></div>
+            <div class="skeleton h-6 w-1/4 mb-8"></div>
+            <div class="skeleton h-[400px] w-full rounded-3xl mb-8"></div>
+            <div class="space-y-4">
+              <div class="skeleton h-6 w-full"></div>
+              <div class="skeleton h-6 w-full"></div>
+              <div class="skeleton h-6 w-3/4"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/storage.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/filters.js"></script>
+  <script src="assets/js/render.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

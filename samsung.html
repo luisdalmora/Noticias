@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Samsung | Noticias Premium</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/animations.css">
+</head>
+<body>
+  <div class="app-container">
+    <aside id="sidebar-placeholder" class="sidebar"></aside>
+    <main class="main-content">
+      <header class="topbar">
+        <div class="flex items-center gap-4 flex-1 max-w-xl">
+          <div class="relative w-full">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">🔍</span>
+            <input type="text" id="global-search" placeholder="Buscar em Samsung..." 
+                   class="w-full bg-[#1a1a1a] border border-white/5 rounded-full py-2 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all">
+          </div>
+        </div>
+      </header>
+      <div class="content-wrapper">
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-900 p-8 rounded-3xl mb-8 relative overflow-hidden group">
+          <div class="relative z-10">
+            <h1 class="text-4xl lg:text-6xl font-black text-white mb-2">SAMSUNG <span class="opacity-50 text-2xl lg:text-4xl">GALAXY</span></h1>
+            <p class="text-white/80 font-bold uppercase tracking-widest text-xs">Acompanhando o ecossistema Android e One UI</p>
+          </div>
+          <div class="absolute right-[-20px] bottom-[-20px] text-[120px] opacity-10 group-hover:scale-110 transition-transform duration-700">📱</div>
+        </div>
+        <div id="news-container"></div>
+      </div>
+    </main>
+  </div>
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/storage.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/filters.js"></script>
+  <script src="assets/js/render.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

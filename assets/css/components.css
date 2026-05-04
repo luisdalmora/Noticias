@@ -1,0 +1,77 @@
+.console-card {
+  background-color: var(--card-bg);
+  border: 2px solid transparent;
+  border-radius: var(--border-radius-lg);
+  padding: 1.25rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.console-card:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+.console-card.active {
+  border-color: var(--accent-red);
+  box-shadow: 0 0 20px rgba(255, 45, 85, 0.3);
+}
+
+.badge {
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.625rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: inline-block;
+}
+
+.badge-high { background-color: var(--accent-red); color: white; }
+.badge-medium { background-color: var(--status-yellow); color: black; }
+.badge-low { background-color: var(--accent-blue); color: white; }
+.badge-official { background-color: var(--status-green); color: black; }
+.badge-rumor { background-color: #444; color: white; }
+
+.glass-panel {
+  background-color: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--border-radius-md);
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  transition: all 0.2s;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: white;
+}
+
+.nav-link.active {
+  background-color: rgba(255, 45, 85, 0.1);
+  color: var(--accent-red);
+  border-left: 4px solid var(--accent-red);
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #1c1c1c 25%, #242424 50%, #1c1c1c 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

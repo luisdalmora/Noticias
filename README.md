@@ -1,70 +1,51 @@
-# 🎮 Noticias Premium OS
+# 🎮 Noticias Premium - Static Edition
 
-Um portal de notícias de alta performance inspirado na interface de consoles modernos (Switch 2 Style), construído com tecnologias puras e arquitetura serverless.
+Uma central de notícias gamer e tech premium, inspirada na interface de consoles modernos (Switch 2 Style), 100% estática e direta.
 
 ## 🚀 Objetivo
-Transformar a curadoria de notícias gamer e tech em uma experiência visual imersiva, rápida e inteligente. O sistema monitora fontes globais, classifica impactos via IA e apresenta tudo em uma interface premium de "Sistema Operacional".
+Oferecer uma experiência visual de alto nível sem a complexidade de frameworks ou ferramentas de build. Ideal para visualização local imediata ou hospedagem em qualquer servidor de arquivos estáticos.
 
 ## 🛠 Stack Tecnológica
-- **Frontend**: HTML5 Semântico, Vanilla JavaScript (ES6+), Tailwind CSS 3.
-- **Tooling**: Vite (Multi-Page Application), PostCSS, Autoprefixer.
-- **Backend**: Node.js Serverless Functions (Vercel API).
-- **IA**: Google Gemini 1.5 Flash para classificação e resumo.
-- **Dados**: RSS Parser, LocalStorage para persistência de preferências.
+- **Linguagens**: HTML5 Semântico, CSS3 Moderno, JavaScript Vanilla (ES6).
+- **Estilização**: Tailwind CSS via CDN.
+- **Dados**: Arquivos JSON locais em `data/`.
+- **Persistência**: LocalStorage para preferências do usuário.
 
-## 📂 Estrutura de Pastas
+## 📂 Estrutura do Projeto
 ```text
-/api                # Serverless Functions (Vercel)
-  /_lib             # Serviços modulares (IA, RSS, Cache)
-/pages              # Páginas HTML (Nintendo, Samsung, etc.)
-/src
-  /assets
-    /css            # Design System (Base, Layout, Components)
-    /js             # Lógica Modular (API, Renderer, UI)
-  /partials         # Componentes HTML reutilizáveis
-index.html          # Dashboard Principal
+Noticias/
+├── index.html           # Dashboard principal
+├── nintendo.html        # Central Nintendo
+├── samsung.html         # Central Samsung/Android
+├── rumores.html         # Central de Vazamentos
+├── noticia.html         # Visualização detalhada
+├── assets/
+│   ├── css/            # Estilos organizados por responsabilidade
+│   └── js/             # Lógica modular pura
+└── data/
+    ├── noticias.json    # Banco de dados de notícias
+    └── fontes.json      # Cadastro de fontes monitoradas
 ```
 
-## ⚙️ Instalação e Uso Local
+## ⚙️ Como Utilizar
 
-1. **Clonar o repositório**:
-   ```bash
-   git clone https://github.com/luisdalmora/Noticias.git
-   cd Noticias
-   ```
+### 1. Acesso Direto
+Basta abrir o arquivo `index.html` em qualquer navegador moderno. 
 
-2. **Instalar dependências**:
-   ```bash
-   npm install
-   ```
+> [!IMPORTANT]
+> Alguns navegadores (como o Chrome) possuem restrições de segurança (CORS) ao carregar arquivos JSON locais via `file://`. Caso os dados não apareçam, recomenda-se abrir a pasta com uma extensão de servidor local (ex: **Live Server** no VS Code) ou desativar temporariamente as restrições de arquivos locais.
 
-3. **Configurar variáveis de ambiente**:
-   Crie um arquivo `.env` baseado no `.env.example` e adicione sua `GEMINI_API_KEY`.
+### 2. Sem Dependências
+Não é necessário rodar `npm install`, `npm run dev` ou qualquer outro comando de terminal. O projeto é autossuficiente.
 
-4. **Rodar em desenvolvimento**:
-   ```bash
-   npm run dev
-   ```
+### 3. Personalização
+Para adicionar novas notícias, basta editar o arquivo `data/noticias.json` seguindo o padrão estabelecido.
 
-5. **Gerar Build**:
-   ```bash
-   npm run build
-   ```
-
-## 🔐 Segurança e Atualização
-O endpoint `/api/update` é protegido. Para disparar a atualização das notícias, é necessário enviar um header de autorização:
-- **Header**: `Authorization: Bearer <CRON_SECRET>`
-
-## 🧠 Classificação de Impacto
-O sistema utiliza IA para definir o peso de cada notícia:
-- **Alta**: Lançamentos oficiais, Nintendo Directs, Firmwares críticos (ZTO).
-- **Média**: Rumores de fontes confiáveis, reviews, atualizações de jogos.
-- **Baixa**: Rumores fracos, curiosidades, notícias genéricas.
-
-## 🎨 Design System (Console Style)
-- **Cores**: Profundo #0a0a0a com acentos em Vermelho Neon e Ciano Tech.
-- **Cards**: Estilo "Tiles" de console com bordas arredondadas (24px) e efeitos de foco.
-- **UX**: Navegação lateral no desktop e barra inferior no mobile.
+## 🎨 Design System
+- **Fundo**: Deep Graphite (#0a0a0a).
+- **Acentos**: Red Neon (#ff2d55) e Cyan Tech (#00e5ff).
+- **Tipografia**: Inter (via Google Fonts).
+- **UX**: Sidebar persistente no desktop e Bottom Bar otimizada para mobile.
 
 ---
-Desenvolvido com ❤️ por Antigravity.
+Desenvolvido com foco em performance e simplicidade.

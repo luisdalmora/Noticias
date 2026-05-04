@@ -1,0 +1,58 @@
+[
+  {
+    "id": "n1",
+    "title": "Nintendo Switch 2: Novos rumores indicam tela OLED de 8 polegadas",
+    "summary": "Vazamentos recentes de fornecedores sugerem que o sucessor do Switch terá uma tela significativamente maior e manterá a retrocompatibilidade.",
+    "link": "https://example.com/n1",
+    "source": "Nintendo Life",
+    "sourceUrl": "https://nintendolife.com",
+    "category": "Nintendo",
+    "type": "Rumor",
+    "impact": "Alta",
+    "pubDate": "2026-05-04T10:00:00Z",
+    "thumbnail": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=800",
+    "tags": ["Switch 2", "Hardware", "Rumor"]
+  },
+  {
+    "id": "s1",
+    "title": "Galaxy S25 Ultra: Samsung confirma data do Unpacked no Brasil",
+    "summary": "O novo flagship da Samsung chegará ao Brasil com exclusividades na One UI 7.1 e melhorias drásticas no processamento de IA.",
+    "link": "https://example.com/s1",
+    "source": "SamMobile",
+    "sourceUrl": "https://sammobile.com",
+    "category": "Samsung",
+    "type": "Oficial",
+    "impact": "Alta",
+    "pubDate": "2026-05-04T09:30:00Z",
+    "thumbnail": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&q=80&w=800",
+    "tags": ["S25 Ultra", "Samsung", "Lançamento"]
+  },
+  {
+    "id": "n2",
+    "title": "Pokémon Legends: Z-A recebe classificação indicativa na Austrália",
+    "summary": "O aguardado próximo passo da franquia Pokémon deu as caras em órgãos reguladores, indicando que o desenvolvimento está avançado.",
+    "link": "https://example.com/n2",
+    "source": "Nintendo Everything",
+    "sourceUrl": "https://nintendoeverything.com",
+    "category": "Nintendo",
+    "type": "Oficial",
+    "impact": "Média",
+    "pubDate": "2026-05-03T15:00:00Z",
+    "thumbnail": "https://images.unsplash.com/photo-1613771404721-1f92d799e49f?auto=format&fit=crop&q=80&w=800",
+    "tags": ["Pokemon", "Switch"]
+  },
+  {
+    "id": "a1",
+    "title": "Android 15: Google inicia testes da versão estável em modelos selecionados",
+    "summary": "A nova versão do sistema operacional foca em privacidade e otimização de bateria para dispositivos de alto desempenho.",
+    "link": "https://example.com/a1",
+    "source": "Android Central",
+    "sourceUrl": "https://androidcentral.com",
+    "category": "Android",
+    "type": "Atualização",
+    "impact": "Média",
+    "pubDate": "2026-05-03T12:00:00Z",
+    "thumbnail": "https://images.unsplash.com/photo-1607252650355-f7fd0460ccdb?auto=format&fit=crop&q=80&w=800",
+    "tags": ["Android 15", "Google"]
+  }
+]
