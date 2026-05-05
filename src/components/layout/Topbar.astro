@@ -29,4 +29,11 @@
   refreshBtn?.addEventListener('click', () => {
     window.location.reload();
   });
+
+  const searchInput = document.getElementById('topbar-search');
+  searchInput?.addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase();
+    window.dispatchEvent(new CustomEvent('app-search', { detail: { query } }));
+  });
 </script>
+

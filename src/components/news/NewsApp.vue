@@ -100,7 +100,9 @@ const loading = ref(true);
 const error = ref(null);
 const updatedAt = ref(null);
 const currentFilter = ref('all'); // all, Nintendo, Samsung, Rumor
+const searchQuery = ref('');
 const visibleCount = ref(30);
+
 
 const fetchNews = async () => {
   loading.value = true;
@@ -122,18 +124,32 @@ const fetchNews = async () => {
 };
 
 const filteredNews = computed(() => {
-  if (currentFilter.value === 'all') return allNews.value;
-  
+  let filtered = allNews.value;
+
+  // 1. Apply category filter
   if (currentFilter.value === 'Rumor') {
-    return allNews.value.filter(n => {
+    filtered = filtered.filter(n => {
       if (n.type !== 'Rumor') return false;
       const text = (n.title + ' ' + n.summary).toLowerCase();
       return n.category === 'Nintendo' || text.includes('nintendo') || text.includes('switch');
     });
+  } else if (currentFilter.value !== 'all') {
+    filtered = filtered.filter(n => n.category === currentFilter.value);
   }
-  
-  return allNews.value.filter(n => n.category === currentFilter.value);
+
+  // 2. Apply search filter
+  if (searchQuery.value) {
+    const q = searchQuery.value.toLowerCase();
+    filtered = filtered.filter(n => 
+      n.title.toLowerCase().includes(q) || 
+      n.summary.toLowerCase().includes(q) ||
+      n.source.toLowerCase().includes(q)
+    );
+  }
+
+  return filtered;
 });
+
 
 
 const visibleNews = computed(() => {
@@ -182,7 +198,15 @@ onMounted(() => {
   };
   window.addEventListener('app-nav', onNav);
 
+  // Listen for search events
+  const onSearch = (e) => {
+    searchQuery.value = e.detail?.query || '';
+    visibleCount.value = 30;
+  };
+  window.addEventListener('app-search', onSearch);
+
   // Check URL hash for initial filter
+
   const hash = window.location.hash.replace('#', '');
   if (['Nintendo', 'Samsung', 'Rumor'].includes(hash)) {
     currentFilter.value = hash;
