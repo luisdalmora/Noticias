@@ -32,8 +32,10 @@
 
   const searchInput = document.getElementById('topbar-search');
   searchInput?.addEventListener('input', (e) => {
-    const query = e.target.value.toLowerCase();
+    const target = e.target as HTMLInputElement;
+    const query = target.value.toLowerCase();
     window.dispatchEvent(new CustomEvent('app-search', { detail: { query } }));
   });
+
 </script>
 
