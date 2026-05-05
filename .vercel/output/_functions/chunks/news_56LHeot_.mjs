@@ -1,6 +1,6 @@
-import { getNewsFromCache } from '../../../server/workflow-service.js';
+import { g as getNewsFromCache } from './workflow-service_D2HR1-Ji.mjs';
 
-export const GET = async ({ url }) => {
+const GET = async ({ url }) => {
   const startTime = Date.now();
   try {
     const category = url.searchParams.get('category');
@@ -55,3 +55,11 @@ export const GET = async ({ url }) => {
   }
 };
 
+const _page = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  GET
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const page = () => _page;
+
+export { page };

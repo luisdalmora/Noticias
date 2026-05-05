@@ -1,7 +1,7 @@
-import { c as createComponent } from './astro-component_Bl3vXr-4.mjs';
+import { c as createComponent } from './astro-component_CEH83wsb.mjs';
 import 'piccolore';
-import { n as renderComponent, r as renderTemplate, m as maybeRenderHead } from './entrypoint_CK4VxcsY.mjs';
-import { $ as $$BaseLayout } from './BaseLayout_Dd1eon7v.mjs';
+import { n as renderComponent, r as renderTemplate, m as maybeRenderHead } from './entrypoint_ClfmAdsr.mjs';
+import { $ as $$BaseLayout } from './BaseLayout_BI3S5Lgz.mjs';
 
 const $$404 = createComponent(($$result, $$props, $$slots) => {
   return renderTemplate`${renderComponent($$result, "BaseLayout", $$BaseLayout, { "title": "Página não encontrada" }, { "default": ($$result2) => renderTemplate` ${maybeRenderHead()}<div class="min-h-[60vh] flex flex-col items-center justify-center text-center"> <div class="w-32 h-32 bg-red-500/10 rounded-full flex items-center justify-center text-6xl mb-8 animate-pulse">

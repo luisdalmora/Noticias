@@ -1,7 +1,7 @@
-import { c as createComponent } from './astro-component_Bl3vXr-4.mjs';
+import { c as createComponent } from './astro-component_CEH83wsb.mjs';
 import 'piccolore';
-import { n as renderComponent, r as renderTemplate, m as maybeRenderHead, h as addAttribute } from './entrypoint_CK4VxcsY.mjs';
-import { $ as $$BaseLayout } from './BaseLayout_Dd1eon7v.mjs';
+import { n as renderComponent, r as renderTemplate, m as maybeRenderHead, h as addAttribute } from './entrypoint_ClfmAdsr.mjs';
+import { $ as $$BaseLayout } from './BaseLayout_BI3S5Lgz.mjs';
 import { F as FIXED_SOURCES, G as GOOGLE_NEWS_QUERIES } from './sources_CaozJTAi.mjs';
 
 const $$Fontes = createComponent(($$result, $$props, $$slots) => {

@@ -44,19 +44,7 @@
 			"dest": "_render"
 		},
 		{
-			"src": "^/nintendo/?$",
-			"dest": "_render"
-		},
-		{
 			"src": "^/noticia/([^/]+?)/?$",
-			"dest": "_render"
-		},
-		{
-			"src": "^/rumores/?$",
-			"dest": "_render"
-		},
-		{
-			"src": "^/samsung/?$",
 			"dest": "_render"
 		},
 		{

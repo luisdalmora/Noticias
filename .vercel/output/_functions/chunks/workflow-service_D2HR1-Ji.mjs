@@ -1,7 +1,9 @@
 import { F as FIXED_SOURCES, G as GOOGLE_NEWS_QUERIES, g as getGoogleNewsUrl } from './sources_CaozJTAi.mjs';
 import Parser from 'rss-parser';
 import * as cheerio from 'cheerio';
-import { C as CacheService } from './cache-service_BXA9ljG7.mjs';
+import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
 
 const parser = new Parser({
   customFields: {
@@ -9,11 +11,22 @@ const parser = new Parser({
   }
 });
 
-async function fetchRssFeed(source) {
+async function fetchRssFeed(source, timeoutMs = 5000) {
+  const startTime = Date.now();
   try {
-    console.log(`📡 Fetching: ${source.name} (${source.rssUrl})`);
-    const feed = await parser.parseURL(source.rssUrl);
+    console.log(`📡 [RSS] Iniciando: ${source.name}`);
     
+    // Promise with timeout
+    const fetchPromise = parser.parseURL(source.rssUrl);
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Timeout excedido')), timeoutMs)
+    );
+
+    const feed = await Promise.race([fetchPromise, timeoutPromise]);
+    const duration = Date.now() - startTime;
+    
+    console.log(`✅ [RSS] Concluído: ${source.name} (${feed.items.length} itens) em ${duration}ms`);
+
     return feed.items.map(item => ({
       ...item,
       sourceId: source.id,
@@ -22,8 +35,9 @@ async function fetchRssFeed(source) {
       sourceCategory: source.category
     }));
   } catch (error) {
-    console.error(`❌ Error fetching ${source.name}:`, error.message);
-    return [];
+    const duration = Date.now() - startTime;
+    console.error(`❌ [RSS] Erro em ${source.name} (${duration}ms):`, error.message);
+    throw error; // Re-throw to be handled by allSettled
   }
 }
 
@@ -234,12 +248,15 @@ async function normalizeNewsItem(item, source = {}) {
 
   const title = cleanText(item.title || 'Sem título');
   const summary = cleanText(item.contentSnippet || item.content || item.description || "");
+  const link = normalizeLink(item.link || item.guid);
 
   return {
-    id: generateNewsId(item.link || item.title),
+    id: generateNewsId(title, link, source.name || item.sourceName),
     title,
     summary: summary.substring(0, 300).trim(),
-    link: item.link,
+    link,
+    originalLink: item.link,
+    googleNewsLink: item.link?.includes('news.google.com') ? item.link : null,
     source: source.name || item.sourceName || 'Fonte Desconhecida',
     sourceUrl: source.url || item.sourceUrl,
     sourceReliability: source.reliability || item.sourceReliability || 'Média',
@@ -249,6 +266,7 @@ async function normalizeNewsItem(item, source = {}) {
     pubDate: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
     thumbnail: image.thumbnail,
     imageSource: image.imageSource,
+    imageStatus: image.imageSource === 'fallback' ? 'fallback' : (image.imageSource === 'rss' ? 'rss' : 'og'),
     tags: extractTags(title, summary),
     classificationReason: item.classificationReason || "Classificação automática por palavras-chave",
     aiEnhanced: false,
@@ -256,10 +274,24 @@ async function normalizeNewsItem(item, source = {}) {
   };
 }
 
-function generateNewsId(input) {
-  if (!input) return Math.random().toString(36).substring(7);
-  return Buffer.from(input).toString('base64').substring(0, 16).replace(/[/+=]/g, '');
+function generateNewsId(title, link, sourceName) {
+  const seed = `${title}-${link}-${sourceName}`;
+  return crypto.createHash('md5').update(seed).digest('hex').substring(0, 16);
 }
+
+function normalizeLink(link) {
+  if (!link) return '';
+  try {
+    const url = new URL(link);
+    // Remove query params that are tracking or dynamic
+    url.search = '';
+    url.hash = '';
+    return url.toString().toLowerCase().replace(/\/$/, "");
+  } catch (e) {
+    return link;
+  }
+}
+
 
 function cleanText(text) {
   if (!text || typeof text !== 'string') return '';
@@ -349,86 +381,259 @@ async function enhanceWithGemini(newsItems) {
   return newsItems;
 }
 
-async function getLatestNews(options = {}) {
-  const maxAgeHours = parseInt(process.env.MAX_NEWS_AGE_HOURS || '24');
-  const cacheKey = `news_feed_${options.category || 'all'}`;
-  
-  // 1. Check Cache
-  const cached = CacheService.get(cacheKey);
-  if (cached) return cached;
+const CACHE_DIR = path.join(process.cwd(), 'temp_data');
+const LOCAL_CACHE_FILE = path.join(CACHE_DIR, 'news_cache.json');
 
-  let allRawItems = [];
+// Ensure cache directory exists for local dev
+if (!fs.existsSync(CACHE_DIR)) {
+  try {
+    fs.mkdirSync(CACHE_DIR, { recursive: true });
+  } catch (e) {
+    console.error('Erro ao criar diretório de cache local:', e.message);
+  }
+}
 
-  // 2. Fetch Fixed Sources
-  if (process.env.USE_FIXED_RSS_SOURCES !== 'false') {
-    const fixedSources = FIXED_SOURCES.filter(s => s.enabled);
-    for (const source of fixedSources) {
-       const items = await fetchRssFeed(source);
-       // Attach source info to each raw item for normalization
-       allRawItems.push(...items.map(item => ({ ...item, _source: source })));
+const CacheService = {
+  async get(key) {
+    // 1. Try Vercel KV if configured
+    if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+      try {
+        const response = await fetch(`${process.env.KV_REST_API_URL}/get/${key}`, {
+          headers: { Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}` }
+        });
+        const data = await response.json();
+        if (data.result) {
+          const item = JSON.parse(data.result);
+          if (Date.now() < item.expiry) return item.value;
+        }
+      } catch (e) {
+        console.error('Erro ao ler do Vercel KV:', e.message);
+      }
     }
+
+    // 2. Fallback to Local File
+    try {
+      if (fs.existsSync(LOCAL_CACHE_FILE)) {
+        const content = fs.readFileSync(LOCAL_CACHE_FILE, 'utf-8');
+        const cache = JSON.parse(content);
+        const item = cache[key];
+        if (item && Date.now() < item.expiry) return item.value;
+      }
+    } catch (e) {
+      console.error('Erro ao ler cache local:', e.message);
+    }
+
+    return null;
+  },
+
+  async set(key, value, ttlSeconds) {
+    const expiry = Date.now() + (ttlSeconds * 1000);
+    const item = { value, expiry };
+
+    // 1. Try Vercel KV
+    if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+      try {
+        await fetch(`${process.env.KV_REST_API_URL}/set/${key}`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}` },
+          body: JSON.stringify(JSON.stringify(item)) // KV set expects string value
+        });
+        // Also set EXPIRE in KV
+        await fetch(`${process.env.KV_REST_API_URL}/expire/${key}/${ttlSeconds}`, {
+          headers: { Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}` }
+        });
+      } catch (e) {
+        console.error('Erro ao gravar no Vercel KV:', e.message);
+      }
+    }
+
+    // 2. Fallback to Local File
+    try {
+      let cache = {};
+      if (fs.existsSync(LOCAL_CACHE_FILE)) {
+        cache = JSON.parse(fs.readFileSync(LOCAL_CACHE_FILE, 'utf-8'));
+      }
+      cache[key] = item;
+      fs.writeFileSync(LOCAL_CACHE_FILE, JSON.stringify(cache, null, 2));
+    } catch (e) {
+      console.error('Erro ao gravar cache local:', e.message);
+    }
+  },
+
+  async clear() {
+    // Clear KV if possible (simplified: we don't have a flushall here, but we can delete the main keys)
+    // For local, just delete the file
+    try {
+      if (fs.existsSync(LOCAL_CACHE_FILE)) {
+        fs.unlinkSync(LOCAL_CACHE_FILE);
+      }
+    } catch (e) {
+      console.error('Erro ao limpar cache local:', e.message);
+    }
+  },
+
+  async getMeta() {
+    try {
+      if (fs.existsSync(LOCAL_CACHE_FILE)) {
+        const stats = fs.statSync(LOCAL_CACHE_FILE);
+        const content = fs.readFileSync(LOCAL_CACHE_FILE, 'utf-8');
+        const cache = JSON.parse(content);
+        return {
+          updatedAt: stats.mtime.toISOString(),
+          size: stats.size,
+          keys: Object.keys(cache)
+        };
+      }
+    } catch (e) {}
+    return { updatedAt: null, size: 0, keys: [] };
+  }
+};
+
+const CACHE_KEY = 'news_feed_all';
+
+/**
+ * FAST READ: Only from cache.
+ */
+async function getNewsFromCache() {
+  const startTime = Date.now();
+  const cached = await CacheService.get(CACHE_KEY);
+  const duration = Date.now() - startTime;
+  
+  if (cached) {
+    console.log(`✅ [CACHE] Hit: ${cached.length} itens retornados em ${duration}ms`);
+    return cached;
+  }
+  
+  console.log(`⚠️ [CACHE] Miss: Nenhum cache encontrado (${duration}ms)`);
+  return null;
+}
+
+/**
+ * HEAVY UPDATE: Process everything and save to cache.
+ */
+async function performUpdate() {
+  const overallStart = Date.now();
+  console.log('🚀 [UPDATE] Iniciando workflow de atualização técnica...');
+
+  const maxAgeHours = parseInt(process.env.MAX_NEWS_AGE_HOURS || '24');
+  let allSources = [];
+
+  // 1. Prepare Sources
+  if (process.env.USE_FIXED_RSS_SOURCES !== 'false') {
+    allSources.push(...FIXED_SOURCES.filter(s => s.enabled));
   }
 
-  // 3. Fetch Google News RSS
   if (process.env.USE_GOOGLE_NEWS_RSS !== 'false') {
     const googleQueries = GOOGLE_NEWS_QUERIES.filter(q => q.enabled);
-    for (const query of googleQueries) {
-      const source = {
-        id: query.id,
-        name: `Google News: ${query.label}`,
-        url: 'https://news.google.com',
-        rssUrl: getGoogleNewsUrl(query.query),
-        category: query.category,
-        reliability: 'Alta'
-      };
-      const items = await fetchRssFeed(source);
-      allRawItems.push(...items.map(item => ({ ...item, _source: source })));
-    }
+    allSources.push(...googleQueries.map(query => ({
+      id: query.id,
+      name: `Google News: ${query.label}`,
+      url: 'https://news.google.com',
+      rssUrl: getGoogleNewsUrl(query.query),
+      category: query.category,
+      reliability: 'Alta'
+    })));
   }
 
-  // 4. Pipeline: Normalize, Filter, Deduplicate
+  console.log(`📊 [UPDATE] Total de fontes a processar: ${allSources.length}`);
+
+  // 2. Parallel Fetching
+  const fetchTimeout = 6000; // 6 seconds timeout per source
+  const fetchResults = await Promise.allSettled(
+    allSources.map(source => fetchRssFeed(source, fetchTimeout))
+  );
+
+  let allRawItems = [];
+  let successCount = 0;
+  let failCount = 0;
+
+  fetchResults.forEach((result, index) => {
+    if (result.status === 'fulfilled') {
+      const source = allSources[index];
+      const items = result.value;
+      allRawItems.push(...items.map(item => ({ ...item, _source: source })));
+      successCount++;
+    } else {
+      failCount++;
+    }
+  });
+
+  console.log(`✅ [UPDATE] Fontes concluídas: ${successCount} sucesso, ${failCount} falha`);
+
+  // 3. Pipeline: Normalize, Filter, Deduplicate
   const now = new Date();
   const processedItems = [];
+  const seenIds = new Set();
   const seenLinks = new Set();
 
   // Sort raw items by date before processing to prioritize newest in deduplication
   allRawItems.sort((a, b) => new Date(b.pubDate || b.isoDate) - new Date(a.pubDate || a.isoDate));
 
   for (const rawItem of allRawItems) {
-    if (!rawItem.link || !rawItem.title) continue;
-    
-    // Deduplicate by base URL
-    const cleanLink = rawItem.link.split('?')[0].replace(/\/$/, "");
-    if (seenLinks.has(cleanLink)) continue;
-    seenLinks.add(cleanLink);
-
-    // Age Filter
     const pubDate = new Date(rawItem.pubDate || rawItem.isoDate);
     if (isNaN(pubDate.getTime())) continue;
+
+    // Age Filter
     const ageHours = (now - pubDate) / (1000 * 60 * 60);
     if (ageHours > maxAgeHours) continue;
 
-    // Normalize (handles image resolution internally now)
+    // Normalize (handles image resolution internally)
     const item = await normalizeNewsItem(rawItem, rawItem._source);
     
     if (item) {
+      // Deduplicate by ID and Link
+      if (seenIds.has(item.id) || seenLinks.has(item.link)) continue;
+      seenIds.add(item.id);
+      seenLinks.add(item.link);
       processedItems.push(item);
     }
   }
 
+  console.log(`🧹 [UPDATE] Processamento concluído: ${processedItems.length} itens únicos (de ${allRawItems.length} brutos)`);
+
   // Sort final items by date desc
   processedItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
 
-  // 5. AI Enhancement (TOP 5)
+  // 4. AI Enhancement (TOP items)
   let finalItems = processedItems;
   if (process.env.GEMINI_ENABLED === 'true' && processedItems.length > 0) {
-    finalItems = await enhanceWithGemini(processedItems);
+    try {
+      console.log('✨ [AI] Iniciando enriquecimento com Gemini...');
+      finalItems = await enhanceWithGemini(processedItems);
+      console.log('✨ [AI] Enriquecimento concluído.');
+    } catch (e) {
+      console.error('❌ [AI] Falha no enriquecimento:', e.message);
+      // Continue with non-enhanced items
+    }
   }
 
-  // 6. Save to Cache
-  CacheService.set(cacheKey, finalItems, parseInt(process.env.CACHE_TTL_SECONDS || '900'));
+  // 5. Save to Cache
+  const ttl = parseInt(process.env.CACHE_TTL_SECONDS || '3600');
+  await CacheService.set(CACHE_KEY, finalItems, ttl);
 
-  return finalItems;
+  const totalDuration = Date.now() - overallStart;
+  console.log(`🏁 [UPDATE] Workflow concluído com sucesso em ${totalDuration}ms. Cache atualizado.`);
+
+  return {
+    success: true,
+    count: finalItems.length,
+    durationMs: totalDuration,
+    sources: {
+      total: allSources.length,
+      success: successCount,
+      failed: failCount
+    },
+    updatedAt: new Date().toISOString()
+  };
 }
 
-export { getLatestNews as g };
+// Deprecated: maintain for backward compatibility if needed, but point to new methods
+async function getLatestNews(options = {}) {
+  const cached = await getNewsFromCache();
+  if (cached) return cached;
+  
+  // If no cache, we DON'T trigger update here anymore to follow the strict rule
+  return [];
+}
+
+export { getLatestNews as a, getNewsFromCache as g, performUpdate as p };

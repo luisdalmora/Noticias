@@ -4,84 +4,150 @@ import { normalizeNewsItem } from './normalize-news.js';
 import { enhanceWithGemini } from './gemini-service.js';
 import { CacheService } from './cache-service.js';
 
-export async function getLatestNews(options = {}) {
-  const maxAgeHours = parseInt(process.env.MAX_NEWS_AGE_HOURS || '24');
-  const cacheKey = `news_feed_${options.category || 'all'}`;
+const CACHE_KEY = 'news_feed_all';
+
+/**
+ * FAST READ: Only from cache.
+ */
+export async function getNewsFromCache() {
+  const startTime = Date.now();
+  const cached = await CacheService.get(CACHE_KEY);
+  const duration = Date.now() - startTime;
   
-  // 1. Check Cache
-  const cached = CacheService.get(cacheKey);
-  if (cached) return cached;
+  if (cached) {
+    console.log(`✅ [CACHE] Hit: ${cached.length} itens retornados em ${duration}ms`);
+    return cached;
+  }
+  
+  console.log(`⚠️ [CACHE] Miss: Nenhum cache encontrado (${duration}ms)`);
+  return null;
+}
 
-  let allRawItems = [];
+/**
+ * HEAVY UPDATE: Process everything and save to cache.
+ */
+export async function performUpdate() {
+  const overallStart = Date.now();
+  console.log('🚀 [UPDATE] Iniciando workflow de atualização técnica...');
 
-  // 2. Fetch Fixed Sources
+  const maxAgeHours = parseInt(process.env.MAX_NEWS_AGE_HOURS || '24');
+  let allSources = [];
+
+  // 1. Prepare Sources
   if (process.env.USE_FIXED_RSS_SOURCES !== 'false') {
-    const fixedSources = FIXED_SOURCES.filter(s => s.enabled);
-    for (const source of fixedSources) {
-       const items = await fetchRssFeed(source);
-       // Attach source info to each raw item for normalization
-       allRawItems.push(...items.map(item => ({ ...item, _source: source })));
-    }
+    allSources.push(...FIXED_SOURCES.filter(s => s.enabled));
   }
 
-  // 3. Fetch Google News RSS
   if (process.env.USE_GOOGLE_NEWS_RSS !== 'false') {
     const googleQueries = GOOGLE_NEWS_QUERIES.filter(q => q.enabled);
-    for (const query of googleQueries) {
-      const source = {
-        id: query.id,
-        name: `Google News: ${query.label}`,
-        url: 'https://news.google.com',
-        rssUrl: getGoogleNewsUrl(query.query),
-        category: query.category,
-        reliability: 'Alta'
-      };
-      const items = await fetchRssFeed(source);
-      allRawItems.push(...items.map(item => ({ ...item, _source: source })));
-    }
+    allSources.push(...googleQueries.map(query => ({
+      id: query.id,
+      name: `Google News: ${query.label}`,
+      url: 'https://news.google.com',
+      rssUrl: getGoogleNewsUrl(query.query),
+      category: query.category,
+      reliability: 'Alta'
+    })));
   }
 
-  // 4. Pipeline: Normalize, Filter, Deduplicate
+  console.log(`📊 [UPDATE] Total de fontes a processar: ${allSources.length}`);
+
+  // 2. Parallel Fetching
+  const fetchTimeout = 6000; // 6 seconds timeout per source
+  const fetchResults = await Promise.allSettled(
+    allSources.map(source => fetchRssFeed(source, fetchTimeout))
+  );
+
+  let allRawItems = [];
+  let successCount = 0;
+  let failCount = 0;
+
+  fetchResults.forEach((result, index) => {
+    if (result.status === 'fulfilled') {
+      const source = allSources[index];
+      const items = result.value;
+      allRawItems.push(...items.map(item => ({ ...item, _source: source })));
+      successCount++;
+    } else {
+      failCount++;
+    }
+  });
+
+  console.log(`✅ [UPDATE] Fontes concluídas: ${successCount} sucesso, ${failCount} falha`);
+
+  // 3. Pipeline: Normalize, Filter, Deduplicate
   const now = new Date();
   const processedItems = [];
+  const seenIds = new Set();
   const seenLinks = new Set();
 
   // Sort raw items by date before processing to prioritize newest in deduplication
   allRawItems.sort((a, b) => new Date(b.pubDate || b.isoDate) - new Date(a.pubDate || a.isoDate));
 
   for (const rawItem of allRawItems) {
-    if (!rawItem.link || !rawItem.title) continue;
-    
-    // Deduplicate by base URL
-    const cleanLink = rawItem.link.split('?')[0].replace(/\/$/, "");
-    if (seenLinks.has(cleanLink)) continue;
-    seenLinks.add(cleanLink);
-
-    // Age Filter
     const pubDate = new Date(rawItem.pubDate || rawItem.isoDate);
     if (isNaN(pubDate.getTime())) continue;
+
+    // Age Filter
     const ageHours = (now - pubDate) / (1000 * 60 * 60);
     if (ageHours > maxAgeHours) continue;
 
-    // Normalize (handles image resolution internally now)
+    // Normalize (handles image resolution internally)
     const item = await normalizeNewsItem(rawItem, rawItem._source);
     
     if (item) {
+      // Deduplicate by ID and Link
+      if (seenIds.has(item.id) || seenLinks.has(item.link)) continue;
+      seenIds.add(item.id);
+      seenLinks.add(item.link);
       processedItems.push(item);
     }
   }
 
+  console.log(`🧹 [UPDATE] Processamento concluído: ${processedItems.length} itens únicos (de ${allRawItems.length} brutos)`);
+
   // Sort final items by date desc
   processedItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
 
-  // 5. AI Enhancement (TOP 5)
+  // 4. AI Enhancement (TOP items)
   let finalItems = processedItems;
   if (process.env.GEMINI_ENABLED === 'true' && processedItems.length > 0) {
-    finalItems = await enhanceWithGemini(processedItems);
+    try {
+      console.log('✨ [AI] Iniciando enriquecimento com Gemini...');
+      finalItems = await enhanceWithGemini(processedItems);
+      console.log('✨ [AI] Enriquecimento concluído.');
+    } catch (e) {
+      console.error('❌ [AI] Falha no enriquecimento:', e.message);
+      // Continue with non-enhanced items
+    }
   }
 
-  // 6. Save to Cache
-  CacheService.set(cacheKey, finalItems, parseInt(process.env.CACHE_TTL_SECONDS || '900'));
+  // 5. Save to Cache
+  const ttl = parseInt(process.env.CACHE_TTL_SECONDS || '3600');
+  await CacheService.set(CACHE_KEY, finalItems, ttl);
 
-  return finalItems;
+  const totalDuration = Date.now() - overallStart;
+  console.log(`🏁 [UPDATE] Workflow concluído com sucesso em ${totalDuration}ms. Cache atualizado.`);
+
+  return {
+    success: true,
+    count: finalItems.length,
+    durationMs: totalDuration,
+    sources: {
+      total: allSources.length,
+      success: successCount,
+      failed: failCount
+    },
+    updatedAt: new Date().toISOString()
+  };
 }
+
+// Deprecated: maintain for backward compatibility if needed, but point to new methods
+export async function getLatestNews(options = {}) {
+  const cached = await getNewsFromCache();
+  if (cached) return cached;
+  
+  // If no cache, we DON'T trigger update here anymore to follow the strict rule
+  return [];
+}
+

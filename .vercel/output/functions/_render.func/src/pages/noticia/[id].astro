@@ -1,17 +1,15 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getLatestNews } from '../../../server/workflow-service.js';
+import { getNewsFromCache } from '../../../server/workflow-service.js';
 
 export async function getStaticPaths() {
-  // Since we are in SSR mode (output: 'server'), getStaticPaths is usually not used.
-  // But if we were static, we'd pre-render these. 
-  // For SSR, we just handle the ID in the component.
   return [];
 }
 
 const { id } = Astro.params;
-const news = await getLatestNews({ limit: 100 });
+const news = await getNewsFromCache() || [];
 const item = news.find(n => n.id === id);
+
 
 if (!item) {
   return Astro.redirect('/404');

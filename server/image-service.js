@@ -77,15 +77,31 @@ function extractImageFromHtmlString(html, baseUrl) {
 async function fetchArticleImage(articleUrl, timeoutMs = 8000) {
   if (!articleUrl || articleUrl === "#") return null;
 
+  let finalUrl = articleUrl;
+  
+  // Resolve Google News redirect if needed
+  if (articleUrl.includes('news.google.com')) {
+    try {
+      const headResponse = await fetch(articleUrl, { 
+        method: 'HEAD', 
+        redirect: 'follow',
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' }
+      });
+      finalUrl = headResponse.url;
+    } catch (e) {
+      console.warn(`⚠️ Erro ao resolver redirect do Google News: ${e.message}`);
+    }
+  }
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const response = await fetch(articleUrl, {
+    const response = await fetch(finalUrl, {
       signal: controller.signal,
       headers: {
         "User-Agent":
-          "Mozilla/5.0 (compatible; NoticiasBot/1.0; +https://github.com/luisdalmora/Noticias)",
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         Accept:
           "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
       },
@@ -107,7 +123,7 @@ async function fetchArticleImage(articleUrl, timeoutMs = 8000) {
     ].filter(Boolean);
 
     for (const candidate of metaCandidates) {
-      const absoluteUrl = absolutizeUrl(candidate, articleUrl);
+      const absoluteUrl = absolutizeUrl(candidate, finalUrl);
       if (isValidImageUrl(absoluteUrl)) {
         return {
           url: absoluteUrl,
@@ -125,7 +141,7 @@ async function fetchArticleImage(articleUrl, timeoutMs = 8000) {
     ].filter(Boolean);
 
     for (const candidate of articleCandidates) {
-      const absoluteUrl = absolutizeUrl(candidate, articleUrl);
+      const absoluteUrl = absolutizeUrl(candidate, finalUrl);
       if (isValidImageUrl(absoluteUrl)) {
         return {
           url: absoluteUrl,
@@ -140,6 +156,9 @@ async function fetchArticleImage(articleUrl, timeoutMs = 8000) {
     return null;
   }
 }
+
+
+
 
 export async function resolveNewsImage(item, source, category = "Gaming") {
   const baseUrl = item.link || source?.url || source?.rssUrl || "";

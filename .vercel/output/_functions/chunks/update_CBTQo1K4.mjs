@@ -1,10 +1,10 @@
-import { performUpdate } from '../../../server/workflow-service.js';
+import { p as performUpdate } from './workflow-service_D2HR1-Ji.mjs';
 
-export const GET = async ({ request }) => {
+const GET = async ({ request }) => {
   return await handleUpdate(request);
 };
 
-export const POST = async ({ request }) => {
+const POST = async ({ request }) => {
   return await handleUpdate(request);
 };
 
@@ -36,3 +36,12 @@ async function handleUpdate(request) {
   }
 }
 
+const _page = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  GET,
+  POST
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const page = () => _page;
+
+export { page };

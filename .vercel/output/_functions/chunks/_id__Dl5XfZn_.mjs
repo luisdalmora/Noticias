@@ -1,8 +1,8 @@
-import { c as createComponent } from './astro-component_Bl3vXr-4.mjs';
+import { c as createComponent } from './astro-component_CEH83wsb.mjs';
 import 'piccolore';
-import { n as renderComponent, r as renderTemplate, m as maybeRenderHead, h as addAttribute } from './entrypoint_CK4VxcsY.mjs';
-import { $ as $$BaseLayout } from './BaseLayout_Dd1eon7v.mjs';
-import { g as getLatestNews } from './workflow-service_C9Sh3Fno.mjs';
+import { n as renderComponent, r as renderTemplate, m as maybeRenderHead, h as addAttribute } from './entrypoint_ClfmAdsr.mjs';
+import { $ as $$BaseLayout } from './BaseLayout_BI3S5Lgz.mjs';
+import { g as getNewsFromCache } from './workflow-service_D2HR1-Ji.mjs';
 
 async function getStaticPaths() {
   return [];
@@ -11,7 +11,7 @@ const $$id = createComponent(async ($$result, $$props, $$slots) => {
   const Astro2 = $$result.createAstro($$props, $$slots);
   Astro2.self = $$id;
   const { id } = Astro2.params;
-  const news = await getLatestNews({ });
+  const news = await getNewsFromCache() || [];
   const item = news.find((n) => n.id === id);
   if (!item) {
     return Astro2.redirect("/404");

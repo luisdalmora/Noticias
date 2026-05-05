@@ -1,4 +1,5 @@
 import { resolveNewsImage } from "./image-service.js";
+import crypto from 'crypto';
 
 export async function normalizeNewsItem(item, source = {}) {
   const category = source.category || item.sourceCategory || "Gaming";
@@ -13,12 +14,15 @@ export async function normalizeNewsItem(item, source = {}) {
 
   const title = cleanText(item.title || 'Sem título');
   const summary = cleanText(item.contentSnippet || item.content || item.description || "");
+  const link = normalizeLink(item.link || item.guid);
 
   return {
-    id: generateNewsId(item.link || item.title),
+    id: generateNewsId(title, link, source.name || item.sourceName),
     title,
     summary: summary.substring(0, 300).trim(),
-    link: item.link,
+    link,
+    originalLink: item.link,
+    googleNewsLink: item.link?.includes('news.google.com') ? item.link : null,
     source: source.name || item.sourceName || 'Fonte Desconhecida',
     sourceUrl: source.url || item.sourceUrl,
     sourceReliability: source.reliability || item.sourceReliability || 'Média',
@@ -28,6 +32,7 @@ export async function normalizeNewsItem(item, source = {}) {
     pubDate: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
     thumbnail: image.thumbnail,
     imageSource: image.imageSource,
+    imageStatus: image.imageSource === 'fallback' ? 'fallback' : (image.imageSource === 'rss' ? 'rss' : 'og'),
     tags: extractTags(title, summary),
     classificationReason: item.classificationReason || "Classificação automática por palavras-chave",
     aiEnhanced: false,
@@ -35,10 +40,31 @@ export async function normalizeNewsItem(item, source = {}) {
   };
 }
 
-function generateNewsId(input) {
-  if (!input) return Math.random().toString(36).substring(7);
-  return Buffer.from(input).toString('base64').substring(0, 16).replace(/[/+=]/g, '');
+function generateNewsId(title, link, sourceName) {
+  const seed = `${title}-${link}-${sourceName}`;
+  return crypto.createHash('md5').update(seed).digest('hex').substring(0, 16);
 }
+
+function normalizeLink(link) {
+  if (!link) return '';
+  try {
+    const url = new URL(link);
+    
+    // Google News links REQUIRE their search params to work
+    if (url.hostname.includes('news.google.com')) {
+      return url.toString().replace(/\/$/, "");
+    }
+
+    // For other links, we can be more aggressive in cleaning
+    url.search = '';
+    url.hash = '';
+    return url.toString().toLowerCase().replace(/\/$/, "");
+  } catch (e) {
+    return link;
+  }
+}
+
+
 
 function cleanText(text) {
   if (!text || typeof text !== 'string') return '';

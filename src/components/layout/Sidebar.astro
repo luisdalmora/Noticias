@@ -26,20 +26,66 @@ const currentPath = Astro.url.pathname;
   <nav class="flex-1 flex flex-col gap-2">
     <p class="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] mb-4 px-4">Menu</p>
     
-    {navItems.map(item => (
-      <a 
-        href={item.href}
-        class={`flex items-center gap-4 px-4 py-4 rounded-2xl font-bold transition-all duration-300 group ${
-          currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href))
-          ? 'bg-red-500/10 text-red-500 border border-red-500/20' 
-          : 'text-gray-500 hover:bg-white/5 hover:text-white'
-        }`}
-      >
-        <span class="text-xl group-hover:scale-110 transition-transform">{item.icon}</span>
-        <span class="tracking-tight">{item.label}</span>
-      </a>
-    ))}
+    {navItems.map(item => {
+      const isLocalFilter = ['/', '/nintendo', '/samsung', '/rumores'].includes(item.href);
+      const filterType = item.label === 'Dashboard' ? 'all' : (item.label === 'Rumores' ? 'Rumor' : item.label);
+      
+      return (
+        <a 
+          href={isLocalFilter ? '#' : item.href}
+          class={`nav-link flex items-center gap-4 px-4 py-4 rounded-2xl font-bold transition-all duration-300 group ${
+            currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href))
+            ? 'bg-red-500/10 text-red-500 border border-red-500/20 active-nav' 
+            : 'text-gray-500 hover:bg-white/5 hover:text-white'
+          }`}
+          data-filter={isLocalFilter ? filterType : null}
+          data-href={item.href}
+        >
+          <span class="text-xl group-hover:scale-110 transition-transform">{item.icon}</span>
+          <span class="tracking-tight">{item.label}</span>
+        </a>
+      )
+    })}
   </nav>
+
+  <script>
+    const navLinks = document.querySelectorAll('.nav-link');
+    
+    navLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        const filter = link.getAttribute('data-filter');
+        const href = link.getAttribute('data-href');
+        
+        if (filter) {
+          e.preventDefault();
+          
+          // Only redirect to home if we are not already there
+          if (window.location.pathname !== '/') {
+            window.location.href = '/#' + filter;
+            return;
+          }
+
+          // Update active state visually
+          navLinks.forEach(l => l.classList.remove('bg-red-500/10', 'text-red-500', 'border', 'border-red-500/20', 'active-nav'));
+          navLinks.forEach(l => {
+             if (!l.classList.contains('text-gray-500')) {
+                l.classList.add('text-gray-500');
+             }
+          });
+          
+          link.classList.add('bg-red-500/10', 'text-red-500', 'border', 'border-red-500/20', 'active-nav');
+          link.classList.remove('text-gray-500');
+
+          // Dispatch event to NewsApp
+          window.dispatchEvent(new CustomEvent('app-nav', { detail: { filter } }));
+          
+          // Update URL hash without reload
+          window.history.pushState(null, '', filter === 'all' ? '/' : '#' + filter);
+        }
+      });
+    });
+  </script>
+
 
   <div class="mt-auto">
     <div class="glass-panel p-4 text-center">
