@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import NewsCard from '../components/news/NewsCard.astro';
+import { getLatestNews } from '../../server/workflow-service.js';
+
+const news = await getLatestNews({ limit: 50 });
+const filtered = news.filter(n => n.type === 'Rumor');
+---
+
+<BaseLayout title="Rumores">
+  <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
+    <div class="flex items-center gap-6">
+      <span class="w-2 h-12 bg-yellow-500 rounded-full shadow-lg shadow-yellow-500/40"></span>
+      <h1 class="text-4xl font-black uppercase tracking-widest italic">Central de <span class="text-yellow-500">Rumores</span></h1>
+    </div>
+    <div class="glass-panel px-6 py-3 border-yellow-500/20 bg-yellow-500/5 max-w-md">
+      <p class="text-[10px] text-yellow-500 font-black uppercase tracking-widest mb-1">⚠️ AVISO DE CONFIABILIDADE</p>
+      <p class="text-[9px] text-gray-500 font-bold leading-relaxed">Rumores não são confirmações oficiais. Verifique sempre a fonte original e o nível de confiança atribuído.</p>
+    </div>
+  </div>
+
+  {filtered.length === 0 ? (
+    <div class="py-20 text-center">
+      <p class="text-gray-500 font-bold uppercase tracking-widest">Nenhum rumor encontrado nas últimas 24 horas.</p>
+    </div>
+  ) : (
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      {filtered.map(item => (
+        <NewsCard news={item} />
+      ))}
+    </div>
+  )}
+</BaseLayout>

@@ -1,42 +1,36 @@
-# 🎮 Noticias Premium - OS v2.2.0
+# 🎮 Noticias Premium - OS v2.4.0
 
-Uma central de notícias gamer e tech premium com arquitetura 100% estática e suporte a modo online/offline inteligente.
+O portal definitivo de notícias gamer/tech, focado em **atualidade real**, **integridade visual** e **performance**.
 
-## ✨ Novidades da Versão 2.2.0
-- **Modo Online/Offline**: Suporte a endpoints externos com fallback automático para JSON local.
-- **Sistema de Status**: Indicadores visuais em tempo real (Online, Offline, Erro).
-- **Busca Avançada**: Pesquisa em títulos, resumos, tags, fontes e categorias.
-- **Histórico Completo**: Novos filtros por impacto, tipo, categoria e ordenação cronológica.
-- **Design Refinado**: Interface inspirada em sistemas operacionais de consoles de nova geração (estilo Switch 2) com animações fluidas e glassmorphism.
+## 🚀 Arquitetura de Integridade (Novidades)
 
-## 🚀 Como Abrir o Projeto
-Como o projeto utiliza `fetch` para carregar os dados JSON, você deve abri-lo usando um servidor local para evitar bloqueios de CORS do navegador.
+### 1. Filtro de Atualidade Real
+O sistema descarta automaticamente qualquer notícia com mais de **24 horas** (configurável via `MAX_NEWS_AGE_HOURS`). Se nenhuma notícia fresca for encontrada, o sistema exibe um estado vazio informativo em vez de mostrar conteúdo antigo.
 
-1.  **VS Code**: Use a extensão **Live Server**.
-2.  **Hospedagem**: Publique em qualquer serviço estático (GitHub Pages, Vercel, Netlify).
+### 2. Garantia de Imagem (Zero-Blank Policy)
+Nunca exibimos um card sem imagem. O pipeline de imagem possui 5 camadas de extração:
+1.  Tags de mídia do RSS (`media:content`).
+2.  Extração de `og:image` e `twitter:image` via busca dinâmica na página original.
+3.  Análise de conteúdo HTML via Cheerio.
+4.  Imagens do Google News.
+5.  **Fallback Local**: Imagens premium por categoria (`Nintendo`, `Samsung`, etc.) para garantir a estética do Dashboard.
 
-## ⚙️ Configuração (Modo Online)
-Edite o arquivo `assets/js/config.js` para conectar o sistema a um endpoint real:
+### 3. Inteligência Opcional (Gemini AI)
+A Gemini API é utilizada apenas para enriquecer as **TOP 5 notícias** mais impactantes. O sistema continua 100% funcional sem IA, garantindo disponibilidade e economia de limites.
 
-```javascript
-const CONFIG = {
-  USE_ONLINE_MODE: true,
-  ONLINE_NEWS_URL: "https://seu-endpoint.com/api/news",
-  // ...
-};
-```
+### 4. Fontes Híbridas
+Combinamos RSS tradicionais com o poder de busca do **Google News RSS**, monitorando termos específicos como "Switch 2", "Galaxy S25 Ultra" e "One UI ZTO Brasil".
 
-O sistema validará e normalizará os dados recebidos automaticamente. Se o endpoint falhar, o sistema ativará o **Offline Mode** usando o `data/noticias.json`.
+## 🛠 Configuração Técnica
 
-## 📂 Estrutura de Dados
-- **`data/noticias.json`**: Banco de dados local para demonstração (fallback).
-- **`data/fontes.json`**: Lista de fontes monitoradas pelo sistema.
+### Variáveis Críticas
+- `GEMINI_ENABLED`: Ativa o processamento de IA.
+- `MAX_NEWS_AGE_HOURS`: Define o limite de "notícia nova".
+- `CRON_SECRET`: Protege o endpoint de atualização forçada.
 
-## 🛠 Tecnologias
-- HTML5 Semântico
-- CSS3 (Variáveis, Flexbox, Grid, Animações)
-- JavaScript Vanilla (ES6+, AbortController, LocalStorage)
-- Tailwind CSS via CDN
+## 📡 Endpoints
+- `GET /api/news`: Feed principal com status detalhado do sistema.
+- `POST /api/update`: Invalida o cache e força a sincronização global.
 
 ---
-*Este projeto não utiliza frameworks (Vue/React/Next) ou ferramentas de build (npm/Vite), mantendo a simplicidade e portabilidade total.*
+*Este portal não utiliza notícias fakes ou mockadas. Toda informação é sincronizada de fontes reais em tempo real.*

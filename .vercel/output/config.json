@@ -1,0 +1,72 @@
+{
+	"version": 3,
+	"routes": [
+		{
+			"handle": "filesystem"
+		},
+		{
+			"src": "^/_astro/(.*)$",
+			"headers": {
+				"cache-control": "public, max-age=31536000, immutable"
+			},
+			"continue": true
+		},
+		{
+			"src": "^/_server-islands/([^/]+?)/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/_image/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/404/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/news/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/update/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/configuracoes/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/fontes/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/historico/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/nintendo/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/noticia/([^/]+?)/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/rumores/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/samsung/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/.*$",
+			"dest": "_render",
+			"status": 404
+		}
+	]
+}

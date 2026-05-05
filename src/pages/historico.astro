@@ -1,0 +1,78 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import NewsCard from '../components/news/NewsCard.astro';
+import { getLatestNews } from '../../server/workflow-service.js';
+
+const news = await getLatestNews({ limit: 100 });
+---
+
+<BaseLayout title="Histórico">
+  <div class="flex flex-col lg:flex-row gap-8 items-start mb-12">
+    <div class="flex-1">
+      <div class="flex items-center gap-6 mb-4">
+        <span class="w-2 h-12 bg-blue-500 rounded-full shadow-lg shadow-blue-500/40"></span>
+        <h1 class="text-4xl font-black uppercase tracking-widest italic">Histórico <span class="text-blue-500">Global</span></h1>
+      </div>
+      <p id="result-count" class="text-xs text-gray-500 font-bold uppercase tracking-widest px-8">{news.length} notícias nas últimas 24h</p>
+    </div>
+
+    <div class="w-full lg:w-auto flex flex-wrap gap-4 glass-panel p-6">
+      <select id="filter-category" class="bg-transparent text-xs font-black uppercase tracking-widest outline-none">
+        <option value="">Categoria: Todas</option>
+        <option value="Nintendo">Nintendo</option>
+        <option value="Samsung">Samsung</option>
+        <option value="Gaming">Gaming</option>
+        <option value="Tech">Tech</option>
+      </select>
+      <select id="filter-type" class="bg-transparent text-xs font-black uppercase tracking-widest outline-none">
+        <option value="">Tipo: Todos</option>
+        <option value="Oficial">Oficial</option>
+        <option value="Rumor">Rumor</option>
+        <option value="Lançamento">Lançamento</option>
+      </select>
+      <select id="filter-impact" class="bg-transparent text-xs font-black uppercase tracking-widest outline-none">
+        <option value="">Impacto: Todos</option>
+        <option value="Alta">Alta</option>
+        <option value="Média">Média</option>
+        <option value="Baixa">Baixa</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+    {news.map(item => (
+      <div class="news-item" data-category={item.category} data-type={item.type} data-impact={item.impact}>
+        <NewsCard news={item} />
+      </div>
+    ))}
+  </div>
+
+  <script>
+    const categoryFilter = document.getElementById('filter-category') as HTMLSelectElement;
+    const typeFilter = document.getElementById('filter-type') as HTMLSelectElement;
+    const impactFilter = document.getElementById('filter-impact') as HTMLSelectElement;
+    const newsItems = document.querySelectorAll('.news-item') as NodeListOf<HTMLElement>;
+
+    function applyFilters() {
+      const cat = categoryFilter.value;
+      const type = typeFilter.value;
+      const impact = impactFilter.value;
+
+      newsItems.forEach(item => {
+        const matchesCat = !cat || item.dataset.category === cat;
+        const matchesType = !type || item.dataset.type === type;
+        const matchesImpact = !impact || item.dataset.impact === impact;
+
+        if (matchesCat && matchesType && matchesImpact) {
+          item.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    categoryFilter.addEventListener('change', applyFilters);
+    typeFilter.addEventListener('change', applyFilters);
+    impactFilter.addEventListener('change', applyFilters);
+  </script>
+</BaseLayout>

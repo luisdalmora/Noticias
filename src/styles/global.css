@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+
+@theme {
+  --color-bg-primary: #050505;
+  --color-bg-secondary: #0f0f0f;
+  --color-accent-red: #ff2d55;
+  --color-accent-cyan: #00e5ff;
+}
+
+@layer base {
+  body {
+    @apply antialiased bg-bg-primary text-white;
+  }
+}
+
+@layer components {
+  .console-card {
+    @apply bg-[#111] border border-white/5 rounded-[2rem] p-6 transition-all duration-300 cursor-pointer hover:border-white/10 hover:-translate-y-1 hover:bg-[#151515] active:scale-[0.98];
+  }
+  
+  .glass-panel {
+    @apply bg-white/5 backdrop-blur-xl border border-white/5 rounded-3xl;
+  }
+  
+  .badge {
+    @apply px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border border-white/5 backdrop-blur-md;
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.5s cubic-bezier(0.2, 1, 0.2, 1) forwards;
+}

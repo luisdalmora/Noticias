@@ -1,0 +1,28 @@
+import { c as createComponent } from './astro-component_Bl3vXr-4.mjs';
+import 'piccolore';
+import { n as renderComponent, r as renderTemplate, m as maybeRenderHead } from './entrypoint_CK4VxcsY.mjs';
+import { $ as $$BaseLayout, r as renderScript } from './BaseLayout_Dd1eon7v.mjs';
+
+const $$Configuracoes = createComponent(($$result, $$props, $$slots) => {
+  return renderTemplate`${renderComponent($$result, "BaseLayout", $$BaseLayout, { "title": "Ajustes" }, { "default": ($$result2) => renderTemplate` ${maybeRenderHead()}<div class="flex items-center gap-6 mb-12"> <span class="w-2 h-12 bg-gray-500 rounded-full"></span> <h1 class="text-4xl font-black uppercase tracking-widest italic">Ajustes <span class="text-gray-600">Core</span></h1> </div> <div class="max-w-2xl glass-panel p-10 space-y-12"> <section> <h2 class="text-xs font-black uppercase tracking-[0.4em] text-red-500 mb-8">Interface OS</h2> <div class="space-y-8"> <div class="flex items-center justify-between"> <div> <p class="font-bold text-lg text-white">Modo Compacto</p> <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">Otimizar espaço na grade de notícias</p> </div> <label class="relative inline-flex items-center cursor-pointer"> <input type="checkbox" id="pref-compact" class="sr-only peer"> <div class="w-14 h-7 bg-gray-900 border border-white/10 rounded-full peer peer-checked:bg-red-500 after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-gray-600 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full peer-checked:after:bg-white"></div> </label> </div> <div class="flex items-center justify-between"> <div> <p class="font-bold text-lg text-white">Animações OS</p> <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">Efeitos de transição e micro-interações</p> </div> <label class="relative inline-flex items-center cursor-pointer"> <input type="checkbox" id="pref-animations" checked class="sr-only peer"> <div class="w-14 h-7 bg-gray-900 border border-white/10 rounded-full peer peer-checked:bg-red-500 after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-gray-600 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full peer-checked:after:bg-white"></div> </label> </div> </div> </section> <section class="pt-8 border-t border-white/5"> <h2 class="text-xs font-black uppercase tracking-[0.4em] text-cyan-500 mb-8">Sistema & Cache</h2> <div class="bg-black/20 rounded-2xl p-6 border border-white/5"> <p class="text-[10px] text-gray-400 font-bold leading-relaxed">
+Este portal utiliza <strong class="text-white">Vercel Hobby Free</strong> com Cache-Control dinâmico. As notícias são atualizadas a cada 15 minutos (900s) para garantir performance e custo zero.
+</p> </div> </section> <button id="save-settings" class="w-full bg-red-500 hover:bg-red-600 text-white font-black py-5 rounded-[2rem] transition-all shadow-xl shadow-red-500/20 active:scale-95 uppercase tracking-widest text-xs">
+Salvar Configurações
+</button> </div> <div id="toast" class="fixed bottom-10 right-10 translate-y-20 opacity-0 transition-all duration-500 z-[200]"> <div class="bg-green-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-2xl">
+✓ Configurações Salvas
+</div> </div> ` })} ${renderScript($$result, "C:/xampp/htdocs/Noticias/src/pages/configuracoes.astro?astro&type=script&index=0&lang.ts")}`;
+}, "C:/xampp/htdocs/Noticias/src/pages/configuracoes.astro", void 0);
+
+const $$file = "C:/xampp/htdocs/Noticias/src/pages/configuracoes.astro";
+const $$url = "/configuracoes";
+
+const _page = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: $$Configuracoes,
+  file: $$file,
+  url: $$url
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const page = () => _page;
+
+export { page };

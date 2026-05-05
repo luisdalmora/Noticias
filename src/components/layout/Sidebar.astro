@@ -1,0 +1,49 @@
+---
+const navItems = [
+  { href: '/', label: 'Dashboard', icon: '🏠' },
+  { href: '/nintendo', label: 'Nintendo', icon: '🎮' },
+  { href: '/samsung', label: 'Samsung', icon: '📱' },
+  { href: '/rumores', label: 'Rumores', icon: '🕵️' },
+  { href: '/historico', label: 'Histórico', icon: '📚' },
+  { href: '/fontes', label: 'Fontes', icon: '🌐' },
+  { href: '/configuracoes', label: 'Ajustes', icon: '⚙️' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<aside class="hidden lg:flex flex-col w-72 bg-[#0a0a0a] border-r border-white/5 h-screen sticky top-0 p-8 z-50">
+  <div class="mb-12 flex items-center gap-4">
+    <div class="w-12 h-12 bg-red-500 rounded-2xl flex items-center justify-center shadow-2xl shadow-red-500/40 transform -rotate-6">
+      <span class="text-white font-black text-2xl">N</span>
+    </div>
+    <div class="flex flex-col">
+      <span class="text-xl font-black tracking-tighter leading-none">NOTICIAS</span>
+      <span class="text-red-500 font-black text-[10px] tracking-[0.3em] mt-1">PREMIUM OS</span>
+    </div>
+  </div>
+
+  <nav class="flex-1 flex flex-col gap-2">
+    <p class="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] mb-4 px-4">Menu</p>
+    
+    {navItems.map(item => (
+      <a 
+        href={item.href}
+        class={`flex items-center gap-4 px-4 py-4 rounded-2xl font-bold transition-all duration-300 group ${
+          currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href))
+          ? 'bg-red-500/10 text-red-500 border border-red-500/20' 
+          : 'text-gray-500 hover:bg-white/5 hover:text-white'
+        }`}
+      >
+        <span class="text-xl group-hover:scale-110 transition-transform">{item.icon}</span>
+        <span class="tracking-tight">{item.label}</span>
+      </a>
+    ))}
+  </nav>
+
+  <div class="mt-auto">
+    <div class="glass-panel p-4 text-center">
+      <p class="text-[10px] font-black text-gray-600 tracking-widest uppercase">Version 2.3.0</p>
+    </div>
+  </div>
+</aside>

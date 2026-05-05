@@ -1,0 +1,13 @@
+---
+const { impact } = Astro.props;
+
+const styles: Record<string, string> = {
+  Alta: 'bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.4)]',
+  Média: 'bg-yellow-500 text-black',
+  Baixa: 'bg-blue-600 text-white',
+};
+---
+
+<span class={`badge ${styles[impact as keyof typeof styles] || 'bg-gray-700'}`}>
+  {impact} IMPACTO
+</span>

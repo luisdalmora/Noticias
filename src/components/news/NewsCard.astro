@@ -1,0 +1,71 @@
+---
+import ImpactBadge from '../badges/ImpactBadge.astro';
+
+const { news } = Astro.props;
+const pubDate = new Date(news.pubDate);
+const timeAgo = pubDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+// Fallback image based on category
+const fallbackImg = `/images/fallback/${news.category.toLowerCase()}-news.webp`;
+---
+
+<div class="news-card-wrapper" id={`card-${news.id}`}>
+  <a href={`/noticia/${news.id}`} class="console-card group flex flex-col gap-4 animate-slide-up h-full">
+    <div class="relative aspect-video rounded-3xl overflow-hidden bg-[#0a0a0a] border border-white/5">
+      <img 
+        src={news.thumbnail} 
+        alt="" 
+        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+        loading="lazy"
+        onerror={`this.onerror=null; this.src='${fallbackImg}'; this.closest('.news-card-wrapper').dataset.imgStatus='fallback';`}
+      />
+      <div class="absolute top-4 left-4">
+        <ImpactBadge impact={news.impact} />
+      </div>
+      {news.aiEnhanced && (
+        <div class="absolute top-4 right-4 bg-purple-600/80 backdrop-blur-md px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest text-white border border-purple-400/20">
+          AI Enhanced
+        </div>
+      )}
+    </div>
+
+    <div class="flex flex-col gap-2 flex-1">
+      <div class="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
+        <span class="flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+          {news.source}
+        </span>
+        <span>{timeAgo}</span>
+      </div>
+      
+      <h3 class="text-lg font-black leading-tight group-hover:text-red-500 transition-colors line-clamp-2 uppercase italic">
+        {news.title}
+      </h3>
+      
+      <p class="text-xs text-gray-400 line-clamp-3 leading-relaxed">
+        {news.summary}
+      </p>
+
+      <div class="mt-auto pt-4 flex items-center justify-between">
+        <div class="flex gap-2">
+          {news.tags.slice(0, 2).map((tag: string) => (
+            <span class="badge bg-white/5 text-gray-500 tracking-tighter">#{tag}</span>
+          ))}
+        </div>
+        <span class={`badge ${news.type === 'Rumor' ? 'text-yellow-500 border-yellow-500/20' : 'text-cyan-500 border-cyan-500/20'}`}>
+          {news.type}
+        </span>
+      </div>
+    </div>
+  </a>
+</div>
+
+<script is:inline>
+  // Global handler for critical image failures
+  document.addEventListener('error', (e) => {
+    if (e.target.tagName === 'IMG' && e.target.src.includes('fallback')) {
+       const wrapper = e.target.closest('.news-card-wrapper');
+       if (wrapper) wrapper.remove(); // Remove card if even fallback fails
+    }
+  }, true);
+</script>
