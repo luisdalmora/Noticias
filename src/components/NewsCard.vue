@@ -1,24 +1,24 @@
 <template>
-  <a :href="news.link" target="_blank" class="news-card glass" :class="{ 'is-highlight': isHighlight }">
+  <a :href="news.link" target="_blank" class="news-card glass" :class="{ 'is-hero': isHighlight, 'is-compact': isCompact }">
     <div class="card-img-container">
       <img v-if="news.thumbnail" :src="news.thumbnail" :alt="news.title" loading="lazy" />
       <div v-else class="img-fallback"></div>
       
-      <div class="badges-top-left">
+      <div class="badges-top-left" v-if="!isCompact">
         <span class="badge impact-badge" :class="impactClass">
           <component :is="impactIcon" :size="12" class="mr-1" />
           {{ news.impact }} Impacto
         </span>
       </div>
       
-      <div class="badges-bottom-left">
+      <div class="badges-bottom-left" v-if="!isCompact">
         <span class="badge category-badge">{{ news.category.toUpperCase() }}</span>
       </div>
     </div>
     
     <div class="card-content">
       <h3 class="card-title card-title-clamp" :title="news.title">{{ news.title }}</h3>
-      <p class="card-summary card-summary-clamp" v-if="!isHighlight">{{ news.summary }}</p>
+      <p class="card-summary card-summary-clamp" v-if="!isCompact">{{ news.summary }}</p>
       
       <div class="card-footer">
         <div class="meta-left">
@@ -27,7 +27,6 @@
           <span class="dot">•</span>
           <span class="time">{{ formattedTime }}</span>
         </div>
-        <ExternalLink :size="16" class="text-muted" />
       </div>
     </div>
   </a>
@@ -37,7 +36,7 @@
 import { computed } from 'vue';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Flame, Scale, Minus, ExternalLink } from 'lucide-vue-next';
+import { Flame, Scale, Minus } from 'lucide-vue-next';
 
 const props = defineProps({
   news: {
@@ -45,6 +44,10 @@ const props = defineProps({
     required: true
   },
   isHighlight: {
+    type: Boolean,
+    default: false
+  },
+  isCompact: {
     type: Boolean,
     default: false
   }
@@ -89,32 +92,21 @@ const getDomain = (url) => {
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   height: 100%;
   position: relative;
+  background: var(--bg-main);
 }
 
 .news-card:hover {
-  transform: translateY(-5px);
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 20px rgba(79, 70, 229, 0.1);
+  transform: translateY(-4px);
+  border-color: rgba(230, 0, 18, 0.4);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(230, 0, 18, 0.15);
 }
 
-.is-highlight {
-  border-color: rgba(239, 68, 68, 0.3);
-  box-shadow: 0 0 30px rgba(239, 68, 68, 0.05);
-}
-.is-highlight:hover {
-  border-color: rgba(239, 68, 68, 0.6);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 30px rgba(239, 68, 68, 0.2);
-}
-
+/* IMAGE CONTAINER */
 .card-img-container {
-  height: 200px;
+  height: 160px;
   width: 100%;
   position: relative;
   overflow: hidden;
-}
-
-.is-highlight .card-img-container {
-  height: 200px; /* Mesma altura agora */
 }
 
 .card-img-container img {
@@ -131,21 +123,23 @@ const getDomain = (url) => {
 .img-fallback {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, var(--bg-main), var(--primary));
+  background: linear-gradient(135deg, #111, var(--primary));
   opacity: 0.5;
 }
 
+/* GRADIENT OVERLAY */
 .card-img-container::after {
   content: '';
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 50%;
+  height: 60%;
   background: linear-gradient(to top, var(--bg-main) 0%, transparent 100%);
   z-index: 1;
 }
 
+/* BADGES */
 .badges-top-left {
   position: absolute;
   top: 12px;
@@ -165,43 +159,44 @@ const getDomain = (url) => {
   align-items: center;
   padding: 4px 10px;
   border-radius: 20px;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.5px;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  text-transform: uppercase;
 }
 
 .mr-1 { margin-right: 4px; }
 
 .category-badge {
   color: var(--text-main);
-  text-transform: uppercase;
-  font-size: 0.75rem;
-  padding: 0;
-  letter-spacing: 1px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 4px 8px;
 }
 
 .impact-high {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ff6b6b;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(230, 0, 18, 0.8);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .impact-medium {
-  background: rgba(234, 179, 8, 0.15);
-  color: #fbbf24;
-  border: 1px solid rgba(234, 179, 8, 0.3);
+  background: rgba(234, 179, 8, 0.8);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .impact-low {
-  background: rgba(156, 163, 175, 0.15);
-  color: #9ca3af;
-  border: 1px solid rgba(156, 163, 175, 0.3);
+  background: rgba(156, 163, 175, 0.8);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+/* CONTENT */
 .card-content {
-  padding: 16px 20px 20px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -209,25 +204,22 @@ const getDomain = (url) => {
 }
 
 .card-title {
-  font-size: 1.15rem;
+  font-size: 0.95rem;
   font-weight: 700;
   line-height: 1.4;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   color: var(--text-main);
 }
 
-.is-highlight .card-title {
-  font-size: 1.15rem; /* Removido o tamanho extra grande */
-}
-
 .card-summary {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   line-height: 1.5;
   color: var(--text-muted);
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   flex-grow: 1;
 }
 
+/* FOOTER */
 .card-footer {
   display: flex;
   justify-content: space-between;
@@ -239,16 +231,109 @@ const getDomain = (url) => {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
 }
 
 .favicon {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border-radius: 4px;
 }
 
 .source { font-weight: 600; color: #d1d5db; }
 .dot { opacity: 0.5; }
+
+/* === HERO CARD (isHighlight) === */
+.is-hero {
+  position: relative;
+  border-color: rgba(230, 0, 18, 0.3);
+  box-shadow: 0 0 30px rgba(230, 0, 18, 0.05);
+}
+
+.is-hero .card-img-container {
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+}
+
+.is-hero .card-img-container::after {
+  height: 80%;
+  background: linear-gradient(to top, var(--bg-main) 10%, rgba(7, 7, 10, 0.7) 40%, transparent 100%);
+}
+
+.is-hero .card-content {
+  position: relative;
+  z-index: 2;
+  background: transparent;
+  justify-content: flex-end;
+  padding: 30px;
+}
+
+.is-hero .card-title {
+  font-size: 1.6rem;
+  margin-bottom: 12px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+}
+
+.is-hero .card-summary {
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.9);
+  text-shadow: 0 1px 5px rgba(0,0,0,0.8);
+  margin-bottom: 20px;
+}
+
+.is-hero .card-footer {
+  margin-top: 0;
+}
+
+.is-hero .meta-left {
+  font-size: 0.8rem;
+  color: white;
+  text-shadow: 0 1px 5px rgba(0,0,0,0.8);
+}
+
+.is-hero .source {
+  color: white;
+}
+
+/* === COMPACT CARD (isCompact) === */
+.is-compact {
+  flex-direction: row;
+  align-items: center;
+  padding: 8px;
+  border-radius: 12px;
+}
+
+.is-compact .card-img-container {
+  height: 70px;
+  width: 100px;
+  min-width: 100px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.is-compact .card-img-container::after {
+  display: none; /* No gradient over compact images */
+}
+
+.is-compact .card-content {
+  padding: 0 0 0 12px;
+  background: transparent;
+  justify-content: center;
+}
+
+.is-compact .card-title {
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+  -webkit-line-clamp: 2;
+}
+
+.is-compact .card-footer {
+  margin-top: 0;
+}
 </style>

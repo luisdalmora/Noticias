@@ -3,34 +3,36 @@
     <!-- LEFT SIDEBAR -->
     <aside class="sidebar-left">
       <div class="brand">
-        <div class="brand-logo"><Activity class="text-white" :size="20"/></div>
+        <div class="brand-logo"><Gamepad2 class="text-white" :size="20"/></div>
         <div class="brand-text">
-          <h1>NewsHub</h1>
-          <span>Gaming & Tech</span>
+          <h1>Nintendo Pulse</h1>
+          <span>Premium Updates</span>
         </div>
       </div>
       
       <nav class="nav-menu">
-        <button class="nav-item" :class="{active: currentFilter === 'All'}" @click="setFilter('All')">
-          <LayoutDashboard :size="20" /> Overview
+        <button class="nav-item" :class="{active: currentFilter === 'All' && !typeFilter}" @click="setFilter('All')">
+          <LayoutDashboard :size="20" /> Todos
         </button>
-        <button class="nav-item" :class="{active: currentFilter === 'Nintendo'}" @click="setFilter('Nintendo')">
-          <Gamepad2 :size="20" /> Nintendo
+        <button class="nav-item" :class="{active: currentFilter === 'Switch 2'}" @click="setFilter('Switch 2')">
+          <Gamepad2 :size="20" /> Switch 2
         </button>
-        <button class="nav-item" :class="{active: currentFilter === 'Samsung'}" @click="setFilter('Samsung')">
-          <Smartphone :size="20" /> Samsung
+        <button class="nav-item" :class="{active: currentFilter === 'Switch'}" @click="setFilter('Switch')">
+          <Gamepad2 :size="20" /> Switch
+        </button>
+        <button class="nav-item" :class="{active: currentFilter === 'Pokémon'}" @click="setFilter('Pokémon')">
+          <Activity :size="20" /> Pokémon
+        </button>
+        <button class="nav-item" :class="{active: currentFilter === 'Mario'}" @click="setFilter('Mario')">
+          <Rocket :size="20" /> Mario
+        </button>
+        <button class="nav-item" :class="{active: currentFilter === 'Zelda'}" @click="setFilter('Zelda')">
+          <Flame :size="20" /> Zelda
         </button>
         <button class="nav-item" :class="{active: typeFilter === 'Rumor'}" @click="setTypeFilter('Rumor')">
           <MessageCircle :size="20" /> Rumores
         </button>
-        <button class="nav-item" :class="{active: currentFilter === 'Histórico'}" @click="setFilter('Histórico')">
-          <Clock :size="20" /> Histórico
-        </button>
       </nav>
-
-      <div class="sidebar-bottom">
-        <!-- Removido Sistema Premium e User Profile a pedido do usuário -->
-      </div>
     </aside>
 
     <!-- MAIN CONTENT -->
@@ -39,19 +41,11 @@
       <header class="topbar">
         <div class="search-container glass">
           <Search :size="18" class="text-muted" />
-          <input type="text" placeholder="Buscar notícias..." v-model="searchQuery" />
+          <input type="text" placeholder="Buscar no Nintendo Pulse..." v-model="searchQuery" />
           <div class="shortcut">⌘ K</div>
         </div>
         
         <div class="topbar-right">
-          <div class="date-widget">
-            <Calendar :size="18" class="text-muted" />
-            <div class="date-text">
-              <span class="date-main">{{ todayFormatted }}</span>
-              <span class="date-sub">{{ weekday }}</span>
-            </div>
-          </div>
-          
           <div class="status-widget">
             <span class="status-dot"></span>
             <div class="status-text">
@@ -62,46 +56,34 @@
           
           <button class="btn-refresh button-primary" @click="forceUpdate" :disabled="isProcessing">
             <RefreshCw :size="16" :class="{'spin': loading || isProcessing}" /> 
-            {{ isProcessing ? 'Processando IA...' : 'Atualizar Notícias' }}
+            {{ isProcessing ? 'Processando IA...' : 'Atualizar' }}
           </button>
         </div>
       </header>
 
-      <!-- CONTENT SCROLL AREA -->
+      <!-- CONTENT SCROLL AREA (Internal Scroll) -->
       <div class="content-scroll" v-if="!loading">
-        <!-- HIGHLIGHTS SECTION -->
-        <section class="highlights-section" v-if="highlightNews.length > 0">
-          <div class="section-header">
-            <h2>🔥 Destaques do Dia</h2>
-            <p>As notícias mais importantes das últimas 24h</p>
-            <button class="btn-text">Ver todas <ChevronRight :size="16"/></button>
-          </div>
-          
-          <div class="highlights-grid">
-            <NewsCard v-for="item in highlightNews" :key="item.id" :news="item" :isHighlight="true" />
-          </div>
-        </section>
+        <div v-if="dashboardNews.length === 0" class="empty-state glass">
+          <SearchX :size="48" class="text-muted mb-4"/>
+          <h3>Nenhuma notícia encontrada</h3>
+        </div>
 
-        <!-- ALL NEWS SECTION -->
-        <section class="all-news-section">
-          <div class="section-header">
-            <h2><Newspaper :size="20" class="mr-2"/> Todas as Notícias</h2>
-            <button class="btn-dropdown glass">Mais recentes <ChevronDown :size="16"/></button>
-          </div>
-          
-          <div v-if="filteredNews.length === 0" class="empty-state glass">
-            <SearchX :size="48" class="text-muted mb-4"/>
-            <h3>Nenhum resultado encontrado</h3>
+        <div v-else class="pulse-dashboard">
+          <!-- TOP ROW: Hero + Destaques -->
+          <div class="top-row" v-if="heroNews">
+            <div class="hero-container">
+              <NewsCard :news="heroNews" :isHighlight="true" class="hero-card" />
+            </div>
+            <div class="destaques-container" v-if="destaquesNews.length > 0">
+              <NewsCard v-for="item in destaquesNews" :key="item.id" :news="item" :isCompact="true" />
+            </div>
           </div>
 
-          <div v-else class="news-grid">
-            <NewsCard v-for="item in filteredNews" :key="item.id" :news="item" />
+          <!-- BOTTOM ROW: Feed -->
+          <div class="feed-container" v-if="feedNews.length > 0">
+            <NewsCard v-for="item in feedNews" :key="item.id" :news="item" />
           </div>
-          
-          <div class="load-more">
-            <button class="btn-text"><ChevronDown :size="16"/> Carregar mais notícias</button>
-          </div>
-        </section>
+        </div>
       </div>
       
       <!-- LOADING STATE -->
@@ -109,76 +91,6 @@
         <Loader2 class="spinner text-gradient" :size="48" />
       </div>
     </main>
-
-    <!-- RIGHT SIDEBAR -->
-    <aside class="sidebar-right">
-      <!-- ESTATÍSTICAS -->
-      <div class="widget-box glass">
-        <div class="widget-header">
-          <h3><BarChart2 :size="16"/> Estatísticas</h3>
-          <span class="text-muted text-sm">Hoje</span>
-        </div>
-        <div class="stats-grid">
-          <div class="stat-card glass">
-            <h2>{{ stats.total }}</h2>
-            <p>Total de Notícias</p>
-            <span class="trend positive">+12% vs ontem</span>
-          </div>
-          <div class="stat-card glass">
-            <h2>{{ stats.high }}</h2>
-            <p>Alto Impacto</p>
-            <span class="trend positive">+25% vs ontem</span>
-          </div>
-          <div class="stat-card glass">
-            <h2>{{ stats.medium }}</h2>
-            <p>Médio Impacto</p>
-            <span class="trend positive">+5% vs ontem</span>
-          </div>
-          <div class="stat-card glass">
-            <h2>{{ stats.rumors }}</h2>
-            <p>Rumores</p>
-            <span class="trend positive">+8% vs ontem</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- FILTROS -->
-      <div class="widget-box glass mt-4">
-        <div class="widget-header">
-          <h3><Filter :size="16"/> Filtros Rápidos</h3>
-        </div>
-        <div class="filter-list">
-          <button class="filter-btn filter-high glass" :class="{active: impactFilter === 'Alta'}" @click="toggleImpact('Alta')">
-            <Flame :size="14" class="mr-2"/> Alto Impacto <span class="badge-count">{{stats.high}}</span>
-          </button>
-          <button class="filter-btn filter-medium glass" :class="{active: impactFilter === 'Média'}" @click="toggleImpact('Média')">
-            <Scale :size="14" class="mr-2"/> Médio Impacto <span class="badge-count">{{stats.medium}}</span>
-          </button>
-          <button class="filter-btn filter-low glass" :class="{active: impactFilter === 'Baixa'}" @click="toggleImpact('Baixa')">
-            <Minus :size="14" class="mr-2"/> Baixo Impacto <span class="badge-count">{{stats.low}}</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- TIMELINE -->
-      <div class="widget-box glass mt-4 flex-grow">
-        <div class="widget-header">
-          <h3><Clock :size="16"/> Timeline do Dia</h3>
-        </div>
-        <div class="timeline">
-          <div class="time-item" v-for="(item, index) in timelineNews" :key="'tl-'+index">
-            <div class="time-dot"></div>
-            <div class="time-content">
-              <span class="time-label">{{ getTime(item.pubDate) }}</span>
-              <div class="time-text">
-                <h4 class="card-title-clamp">{{ item.title }}</h4>
-                <p>{{ item.source }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </aside>
   </div>
 </template>
 
@@ -187,10 +99,8 @@ import { ref, computed, onMounted } from 'vue';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { 
-  Activity, LayoutDashboard, Gamepad2, Smartphone, MessageCircle, 
-  Clock, Rocket, User, MoreVertical, Search, Calendar, RefreshCw,
-  ChevronRight, ChevronDown, Newspaper, SearchX, BarChart2, Filter,
-  Flame, Scale, Minus, Loader2
+  Gamepad2, LayoutDashboard, Activity, Rocket, Flame,
+  MessageCircle, Search, RefreshCw, SearchX, Loader2
 } from 'lucide-vue-next';
 import NewsCard from './components/NewsCard.vue';
 import { fetchLatestNews, forceProcessNews } from './services/api';
@@ -199,13 +109,10 @@ const news = ref([]);
 const loading = ref(true);
 const isProcessing = ref(false);
 const searchQuery = ref('');
-const impactFilter = ref('');
 const currentFilter = ref('All');
 const typeFilter = ref('');
 
 const lastUpdated = ref(format(new Date(), 'HH:mm aa'));
-const todayFormatted = ref(format(new Date(), "dd 'de' MMMM, yyyy", { locale: ptBR }));
-const weekday = ref(format(new Date(), 'EEEE', { locale: ptBR }));
 
 const fetchData = async () => {
   loading.value = true;
@@ -241,74 +148,50 @@ const setTypeFilter = (type) => {
   currentFilter.value = 'All';
 };
 
-const toggleImpact = (impact) => {
-  if (impactFilter.value === impact) impactFilter.value = '';
-  else impactFilter.value = impact;
-};
-
-// Computeds
-const highlightNews = computed(() => {
+// Filtered and limited news
+const dashboardNews = computed(() => {
   let result = news.value;
   
-  if (currentFilter.value !== 'All' && currentFilter.value !== 'Histórico') {
-    result = result.filter(n => n.category === currentFilter.value);
-  }
+  // Filter out news without thumbnail as requested
+  result = result.filter(n => n.thumbnail && n.thumbnail.trim() !== '');
   
-  if (typeFilter.value) {
-    result = result.filter(n => n.type === typeFilter.value);
-  }
-  
-  return result.filter(n => n.impact === 'Alta').slice(0, 5);
-});
-
-const filteredNews = computed(() => {
-  // Excluir destaques da lista geral (usando title em vez de id para evitar falha com json antigo)
-  const highlightTitles = new Set(highlightNews.value.map(n => n.title));
-  let result = news.value.filter(n => !highlightTitles.has(n.title));
-
-  if (currentFilter.value !== 'All' && currentFilter.value !== 'Histórico') {
-    result = result.filter(n => n.category === currentFilter.value);
-  }
-
-  if (typeFilter.value) {
-    result = result.filter(n => n.type === typeFilter.value);
-  }
-
-  if (impactFilter.value) {
-    result = result.filter(n => n.impact === impactFilter.value);
-  }
-
+  // Apply search
   if (searchQuery.value) {
     const q = searchQuery.value.toLowerCase();
     result = result.filter(n => n.title.toLowerCase().includes(q));
   }
 
-  // Se for Histórico, ordena por data mais antiga primeiro ou mais recente
-  if (currentFilter.value === 'Histórico') {
-    result.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+  // Apple category filter (only nintendo ones)
+  if (currentFilter.value !== 'All') {
+    // If exact match doesn't work, we can just do a broad term search for Mario/Zelda etc.
+    const term = currentFilter.value.toLowerCase();
+    result = result.filter(n => 
+      (n.category && n.category.toLowerCase() === term) ||
+      (n.title && n.title.toLowerCase().includes(term)) ||
+      (n.summary && n.summary.toLowerCase().includes(term))
+    );
   }
 
-  return result;
+  if (typeFilter.value) {
+    result = result.filter(n => n.type === typeFilter.value);
+  }
+  
+  // Sort by pubDate or priority
+  // For Nintendo Pulse we want to highlight High impact or recent
+  const sorted = [...result].sort((a, b) => {
+    if (a.impact === 'Alta' && b.impact !== 'Alta') return -1;
+    if (a.impact !== 'Alta' && b.impact === 'Alta') return 1;
+    return new Date(b.pubDate) - new Date(a.pubDate);
+  });
+
+  // Limit to 11 items max
+  return sorted.slice(0, 11);
 });
 
-const timelineNews = computed(() => {
-  return news.value.slice(0, 4);
-});
+const heroNews = computed(() => dashboardNews.value[0] || null);
+const destaquesNews = computed(() => dashboardNews.value.slice(1, 5));
+const feedNews = computed(() => dashboardNews.value.slice(5, 11));
 
-const getTime = (dateStr) => {
-  if (!dateStr) return '';
-  return format(new Date(dateStr), 'HH:mm');
-};
-
-const stats = computed(() => {
-  return {
-    total: news.value.length,
-    high: news.value.filter(n => n.impact === 'Alta').length,
-    medium: news.value.filter(n => n.impact === 'Média').length,
-    low: news.value.filter(n => n.impact === 'Baixa').length,
-    rumors: news.value.filter(n => n.type === 'Rumor').length
-  };
-});
 </script>
 
 <style scoped>
@@ -322,9 +205,9 @@ const stats = computed(() => {
 
 /* SIDEBAR LEFT */
 .sidebar-left {
-  width: 260px;
-  min-width: 260px;
-  background: rgba(11, 11, 15, 0.95);
+  width: 240px;
+  min-width: 240px;
+  background: rgba(7, 7, 10, 0.95);
   border-right: 1px solid var(--border-glass);
   display: flex;
   flex-direction: column;
@@ -348,17 +231,21 @@ const stats = computed(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 0 15px rgba(230, 0, 18, 0.4);
 }
 
 .brand-text h1 {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 800;
-  line-height: 1;
+  line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
 }
 
 .brand-text span {
-  font-size: 0.75rem;
-  color: var(--text-muted);
+  font-size: 0.7rem;
+  color: var(--primary);
+  font-weight: 600;
 }
 
 .nav-menu {
@@ -389,78 +276,9 @@ const stats = computed(() => {
 }
 
 .nav-item.active {
-  background: linear-gradient(90deg, rgba(79, 70, 229, 0.15), rgba(147, 51, 234, 0.15));
+  background: linear-gradient(90deg, rgba(230, 0, 18, 0.15), rgba(255, 51, 68, 0.05));
   color: var(--primary);
-  border: 1px solid rgba(79, 70, 229, 0.3);
-}
-
-.sidebar-bottom {
-  margin-top: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.premium-box {
-  padding: 16px;
-  border-radius: 12px;
-  text-align: left;
-}
-
-.premium-box h4 {
-  font-size: 0.9rem;
-  margin-bottom: 4px;
-}
-
-.premium-box p {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  line-height: 1.4;
-}
-
-.user-profile {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.user-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.user-info .name {
-  font-size: 0.9rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.pro-badge {
-  font-size: 0.6rem;
-  background: linear-gradient(90deg, var(--primary), var(--secondary));
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-weight: 800;
-}
-
-.user-info .role {
-  font-size: 0.75rem;
-  color: var(--text-muted);
+  border: 1px solid rgba(230, 0, 18, 0.3);
 }
 
 /* MAIN CONTENT */
@@ -469,25 +287,25 @@ const stats = computed(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: radial-gradient(circle at top right, rgba(79, 70, 229, 0.05) 0%, transparent 50%);
+  background: radial-gradient(circle at top right, rgba(230, 0, 18, 0.05) 0%, transparent 60%);
 }
 
 .topbar {
-  height: 80px;
-  min-height: 80px;
+  height: 70px;
+  min-height: 70px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 32px;
+  padding: 0 24px;
   border-bottom: 1px solid var(--border-glass);
 }
 
 .search-container {
   display: flex;
   align-items: center;
-  padding: 10px 16px;
+  padding: 8px 16px;
   border-radius: 10px;
-  width: 380px;
+  width: 320px;
 }
 
 .search-container input {
@@ -498,6 +316,7 @@ const stats = computed(() => {
   flex-grow: 1;
   outline: none;
   font-family: var(--font-inter);
+  font-size: 0.9rem;
 }
 
 .shortcut {
@@ -514,31 +333,30 @@ const stats = computed(() => {
   gap: 24px;
 }
 
-.date-widget, .status-widget {
+.status-widget {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.date-text, .status-text {
+.status-text {
   display: flex;
   flex-direction: column;
 }
 
-.date-main, .status-main {
+.status-main {
   font-size: 0.85rem;
   font-weight: 600;
 }
 
-.date-sub, .status-sub {
+.status-sub {
   font-size: 0.75rem;
   color: var(--text-muted);
-  text-transform: capitalize;
 }
 
 .status-dot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   background: var(--success);
   border-radius: 50%;
   box-shadow: 0 0 10px var(--success);
@@ -547,232 +365,53 @@ const stats = computed(() => {
 .content-scroll {
   flex-grow: 1;
   overflow-y: auto;
-  padding: 32px;
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 24px;
-}
-
-.section-header h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-}
-
-.section-header p {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  margin-top: 4px;
-}
-
-.btn-text {
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  font-family: var(--font-inter);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.btn-text:hover { color: var(--text-main); }
-
-.btn-dropdown {
-  padding: 8px 16px;
-  border-radius: 8px;
-  color: var(--text-main);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-}
-
-/* HIGHLIGHTS */
-.highlights-section {
-  margin-bottom: 40px;
-}
-
-.highlights-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
-}
-
-/* ALL NEWS */
-.news-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
-  margin-bottom: 30px;
-}
-
-.load-more {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-/* RIGHT SIDEBAR */
-.sidebar-right {
-  width: 320px;
-  min-width: 320px;
-  border-left: 1px solid var(--border-glass);
-  padding: 24px 20px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-  background: rgba(11, 11, 15, 0.5);
 }
 
-.widget-box {
-  padding: 20px;
-  border-radius: 16px;
-  margin-bottom: 20px;
-}
-
-.widget-header {
+/* PULSE DASHBOARD GRID */
+.pulse-dashboard {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
+  flex-direction: column;
+  gap: 20px;
+  height: 100%;
 }
 
-.widget-header h3 {
-  font-size: 1rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.stats-grid {
+.top-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  height: 45vh; /* Ocupa cerca de 45% da altura visível */
+  min-height: 350px;
+}
+
+.hero-container {
+  height: 100%;
+}
+
+.hero-card {
+  height: 100%;
+}
+
+.destaques-container {
+  display: grid;
+  grid-template-rows: repeat(4, 1fr);
   gap: 12px;
+  height: 100%;
 }
 
-.stat-card {
-  padding: 16px;
-  border-radius: 12px;
-}
-
-.stat-card h2 {
-  font-size: 1.5rem;
-  margin-bottom: 4px;
-}
-
-.stat-card p {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  margin-bottom: 8px;
-}
-
-.trend {
-  font-size: 0.7rem;
-  font-weight: 600;
-}
-.trend.positive { color: var(--success); }
-
-.filter-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.filter-btn {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: 12px 16px;
-  border-radius: 10px;
-  color: var(--text-main);
-  font-family: var(--font-inter);
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: all 0.2s;
-}
-
-.filter-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.filter-btn.active {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.filter-high .badge-count { background: rgba(239, 68, 68, 0.2); color: #ff6b6b; }
-.filter-medium .badge-count { background: rgba(234, 179, 8, 0.2); color: #fbbf24; }
-.filter-low .badge-count { background: rgba(156, 163, 175, 0.2); color: #9ca3af; }
-
-.badge-count {
-  margin-left: auto;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-/* TIMELINE */
-.timeline {
-  display: flex;
-  flex-direction: column;
+.feed-container {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
   gap: 20px;
-  position: relative;
-  padding-left: 10px;
+  flex-grow: 1;
 }
 
-.timeline::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 14px;
-  width: 1px;
-  background: var(--border-glass);
-}
-
-.time-item {
-  display: flex;
-  gap: 16px;
-  position: relative;
-}
-
-.time-dot {
-  width: 9px;
-  height: 9px;
-  background: var(--primary);
-  border-radius: 50%;
-  box-shadow: 0 0 10px var(--primary);
-  margin-top: 4px;
-  z-index: 2;
-}
-
-.time-content {
-  display: flex;
-  gap: 16px;
-}
-
-.time-label {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  min-width: 40px;
-}
-
-.time-text h4 {
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-bottom: 2px;
-}
-
-.time-text p {
-  font-size: 0.75rem;
-  color: var(--text-muted);
+@media (max-width: 1400px) {
+  .feed-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .loading-full {
@@ -788,5 +427,6 @@ const stats = computed(() => {
   text-align: center;
   padding: 60px;
   border-radius: 16px;
+  margin: auto;
 }
 </style>

@@ -20,7 +20,7 @@ export async function enhanceTopNewsWithAI(rankedNews) {
 
 REGRAS:
 1. FAKE NEWS: Marque "isFake" como true para dados tecnicamente irreais.
-2. ISOLAMENTO: Nintendo = Consolas. Samsung = Mobile. Marque "platform_violation": true se houver mistura.
+2. ISOLAMENTO: Somente Nintendo. Se a notícia não for sobre Nintendo, Switch, Pokémon, Zelda, Mario, etc. marque "platform_violation": true.
 3. TRADUÇÃO OBRIGATÓRIA: O campo "title_pt" DEVE conter o título 100% traduzido para Português do Brasil (PT-BR). É proibido devolver o título em inglês.
 4. RESUMO: Um resumo premium em até 2 frases, em PT-BR, no campo "summary".
 5. IMAGEM IA: Escreva um prompt visual EM INGLÊS detalhado (ex: "cinematic shot of...") no campo "image_prompt", que descreva perfeitamente o assunto da notícia para um gerador de imagens IA.

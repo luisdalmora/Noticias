@@ -6,13 +6,7 @@ export function stripHtml(html) {
 function classifyImpact(title, content, category) {
   const t = title.toLowerCase();
   
-  if (category === 'Samsung') {
-    if (t.includes('zto') || t.includes('galaxy s2') || t.includes('galaxy z') || 
-        t.includes('urgente') || t.includes('oficial') || t.includes('lançamento') || 
-        t.includes('vazamento grave')) {
-      return 'Alta';
-    }
-  } else if (category === 'Nintendo') {
+  if (category === 'Nintendo') {
     if (t.includes('nintendo direct') || t.includes('switch 2') || t.includes('urgente') || 
         t.includes('oficial') || t.includes('lançamento') || t.includes('vazamento grave') || 
         t.includes('review') || t.includes('análise')) {
